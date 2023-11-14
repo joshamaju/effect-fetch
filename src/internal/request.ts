@@ -3,14 +3,14 @@ import * as Effect from 'effect/Effect'
 export class HttpRequest {
     private _request: Request | null = null;
 
-    constructor(readonly url: string | URL, readonly init?: RequestInit) { }
+    constructor(readonly url: string | URL | HttpRequest, readonly init?: RequestInit) { }
 
     get request(): Request {
         if (this._request !== null) {
             return this._request
         }
 
-        const req = new Request(this.url, this.init)
+        const req = this.url instanceof HttpRequest ? this.url.request : new Request(this.url, this.init)
         this._request = req;
         return req;
     }
