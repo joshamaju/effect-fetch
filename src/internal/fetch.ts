@@ -1,7 +1,9 @@
+import * as Effect from 'effect/Effect';
 import * as Context from 'effect/Context'
+import { HttpError } from './error.js';
 
-type Identity<I> = I;
-
-export interface Fetch extends Identity<typeof globalThis['fetch']> {}
+export interface Fetch {
+    (url: string | URL, init?: RequestInit): Effect.Effect<never, HttpError, Response>
+}
 
 export const Fetch = Context.Tag<Fetch>('effect-fetch/Fetch')
