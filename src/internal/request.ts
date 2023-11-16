@@ -1,18 +1,30 @@
 import * as Effect from 'effect/Effect'
+import { identity } from 'effect/Function'
+import {pipeArguments, Pipeable} from 'effect/Pipeable'
 
-export class HttpRequest {
+const RequestTypeId = Symbol.for('effect-fetch/Request')
+type RequestTypeId = typeof RequestTypeId
+
+interface IHttpRequest extends Pipeable {}
+
+export class HttpRequest implements IHttpRequest {
+
     private _request: Request | null = null;
 
-    constructor(readonly url: string | URL | HttpRequest, readonly init?: RequestInit) { }
+    constructor(readonly url_: string | URL | HttpRequest, readonly init?: RequestInit) { }
 
     get request(): Request {
         if (this._request !== null) {
             return this._request
         }
 
-        const req = this.url instanceof HttpRequest ? this.url.request : new Request(this.url, this.init)
+        const req = this.url_ instanceof HttpRequest ? this.url_.request : new Request(this.url_, this.init)
         this._request = req;
         return req;
+    }
+
+    get url(): string {
+        return this.request.url
     }
 
     get cache(): RequestCache {
@@ -108,5 +120,9 @@ export class HttpRequest {
             try: () => this.request.text(),
             catch: error => error as Error
         })
+    }
+
+    pipe() {
+        return pipeArguments(this, arguments)
     }
 }

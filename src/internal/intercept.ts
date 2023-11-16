@@ -7,7 +7,7 @@ export interface Context {
     proceed(request: HttpRequest): Effect.Effect<never, HttpError, Response>;
 }
 
-export type Interceptor = (context: Context) => Effect.Effect<never, HttpError, Response>;
+export type Interceptor<E = any> = (context: Context) => Effect.Effect<never, E | HttpError, Response>;
 
 export function compose(
     initiator: (context: Context) => Effect.Effect<never, HttpError, Response>
@@ -18,7 +18,7 @@ export function compose(
         function dispatch(
             i: number,
             request: HttpRequest
-        ): Effect.Effect<never, HttpError, Response> {
+        ): Effect.Effect<never, any, Response> {
             return Effect.gen(function* (_) {
                 if (i <= index) {
                     throw new Error("next() called multiple times");
