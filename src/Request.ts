@@ -1,7 +1,6 @@
-import * as Effect from 'effect/Effect'
-import { HttpRequest } from './internal/request.js'
 import { dual } from 'effect/Function'
 import { Body } from './internal/body.js'
+import { HttpRequest } from './internal/request.js'
 
 export const make = (url: string | URL, init?: RequestInit) => new HttpRequest(url, init)
 

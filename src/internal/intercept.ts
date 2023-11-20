@@ -1,6 +1,7 @@
 import * as Effect from 'effect/Effect';
 import { HttpError } from './error.js';
 import { HttpRequest } from './request.js';
+import { Fetch } from './fetch.js';
 
 export interface Context {
     request(): HttpRequest
@@ -46,4 +47,23 @@ export function compose(
 
         return dispatch(0, request);
     };
+}
+
+export const intercept = (...interceptors: Array<Interceptor>) => {
+    return Effect.gen(function* (_) {
+        const fetch = yield* _(Fetch)
+
+        const handler = compose(({request}) => {
+            const { url, init } = request();
+            return fetch(url, init)
+        })
+
+        const run = handler(interceptors)
+
+        return Fetch.of((...args) => run(new HttpRequest(...args)))
+    })
+}
+
+export const makeFetch = (fetch: Fetch, ...interceptors: Array<Interceptor>) => {
+    return intercept(...interceptors).pipe(Effect.provideService(Fetch, fetch))
 }

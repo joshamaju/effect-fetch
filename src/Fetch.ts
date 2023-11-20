@@ -1,13 +1,31 @@
-import * as Effect from 'effect/Effect'
-import * as Layer from 'effect/Layer'
-import { Fetch } from './internal/fetch.js'
-import { flow } from 'effect/Function'
-import { HttpResponse } from './Response.js'
+import * as internal from "./internal/fetch.js";
 
-export const fetch = (url: string | URL, init?: RequestInit) => Effect.flatMap(Fetch, fetch_ => fetch_(url, init))
+/**
+ * @since 1.0.0
+ * @category constructors
+ */
+export const fetch = internal.fetch;
 
-export const fetch_ = flow(fetch, Effect.map(response => new HttpResponse(response)))
+/**
+ * Constructs a request whose response is a `Response` wrapper with the decode methods replace with their `Effect` conterparts
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const fetch_ = internal.fetch_;
 
-export const make = (fetch: Fetch) => Layer.succeed(Fetch, fetch)
+/**
+ * Constructs a `Fetch` layer using the given platform adapter
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const make = internal.make;
 
-export const effect = <R, E>(fetch: Effect.Effect<R, E, Fetch>) => Layer.effect(Fetch, fetch)
+/**
+ * Constructs a `Fetch` layer from the specified effect that produces the given platform adapter
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const makeEffect = internal.makeEffect;

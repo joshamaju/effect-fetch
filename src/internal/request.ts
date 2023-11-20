@@ -1,128 +1,140 @@
-import * as Effect from 'effect/Effect'
-import { identity } from 'effect/Function'
-import {pipeArguments, Pipeable} from 'effect/Pipeable'
+import * as Effect from "effect/Effect";
+import { DecodeError } from "./error.js";
+import { decode } from "./utils.js";
+import { dual } from "effect/Function";
+import { Body } from "./body.js";
 
-const RequestTypeId = Symbol.for('effect-fetch/Request')
-type RequestTypeId = typeof RequestTypeId
+export const json = decode((request: Request) => request.json());
 
-interface IHttpRequest extends Pipeable {}
+export const blob = decode((request: Request) => request.blob());
 
-export class HttpRequest implements IHttpRequest {
+export const text = decode((response: Request) => response.text());
 
-    private _request: Request | null = null;
+export const formData = decode((request: Request) => request.formData());
 
-    constructor(readonly url_: string | URL | HttpRequest, readonly init?: RequestInit) { }
+export const arrayBuffer = decode((request: Request) => request.arrayBuffer());
 
-    get request(): Request {
-        if (this._request !== null) {
-            return this._request
-        }
+export class HttpRequest {
+  private _request: Request | null = null;
 
-        const req = this.url_ instanceof HttpRequest ? this.url_.request : new Request(this.url_, this.init)
-        this._request = req;
-        return req;
+  constructor(
+    readonly url_: string | URL | HttpRequest,
+    readonly init?: RequestInit
+  ) {}
+
+  get request(): Request {
+    if (this._request !== null) {
+      return this._request;
     }
 
-    get url(): string {
-        return this.request.url
-    }
+    const req =
+      this.url_ instanceof HttpRequest
+        ? this.url_.request
+        : new Request(this.url_, this.init);
+    this._request = req;
+    return req;
+  }
 
-    get cache(): RequestCache {
-        return this.request.cache
-    }
+  get url(): string {
+    return this.request.url;
+  }
 
-    get credentials(): RequestCredentials {
-        return this.request.credentials
-    }
+  get cache(): RequestCache {
+    return this.request.cache;
+  }
 
-    get destination(): RequestDestination {
-        return this.request.destination
-    }
+  get credentials(): RequestCredentials {
+    return this.request.credentials;
+  }
 
-    get headers(): Headers {
-        return this.request.headers
-    }
+  get destination(): RequestDestination {
+    return this.request.destination;
+  }
 
-    get integrity(): string {
-        return this.request.integrity
-    }
+  get headers(): Headers {
+    return this.request.headers;
+  }
 
-    get keepalive(): boolean {
-        return this.request.keepalive
-    }
+  get integrity(): string {
+    return this.request.integrity;
+  }
 
-    get method(): string {
-        return this.request.method
-    }
+  get keepalive(): boolean {
+    return this.request.keepalive;
+  }
 
-    get mode(): RequestMode {
-        return this.request.mode
-    }
+  get method(): string {
+    return this.request.method;
+  }
 
-    get redirect(): RequestRedirect {
-        return this.request.redirect
-    }
+  get mode(): RequestMode {
+    return this.request.mode;
+  }
 
-    get referrer(): string {
-        return this.request.referrer
-    }
+  get redirect(): RequestRedirect {
+    return this.request.redirect;
+  }
 
-    get referrerPolicy(): ReferrerPolicy {
-        return this.request.referrerPolicy
-    }
+  get referrer(): string {
+    return this.request.referrer;
+  }
 
-    get signal(): AbortSignal {
-        return this.request.signal
-    }
+  get referrerPolicy(): ReferrerPolicy {
+    return this.request.referrerPolicy;
+  }
 
-    get body(): ReadableStream<Uint8Array> | null {
-        return this.request.body
-    }
+  get signal(): AbortSignal {
+    return this.request.signal;
+  }
 
-    get bodyUsed(): boolean {
-        return this.request.bodyUsed
-    }
+  get body(): ReadableStream<Uint8Array> | null {
+    return this.request.body;
+  }
 
-    clone(): HttpRequest {
-        return new HttpRequest(this.url, this.init)
-    }
+  get bodyUsed(): boolean {
+    return this.request.bodyUsed;
+  }
 
-    arrayBuffer(): Effect.Effect<never, Error, ArrayBuffer> {
-        return Effect.tryPromise({
-            try: () => this.request.arrayBuffer(),
-            catch: error => error as Error
-        })
-    }
+  clone(): HttpRequest {
+    return new HttpRequest(this.url, this.init);
+  }
 
-    blob(): Effect.Effect<never, Error, Blob> {
-        return Effect.tryPromise({
-            try: () => this.request.blob(),
-            catch: error => error as Error
-        })
-    }
+  arrayBuffer(): Effect.Effect<never, DecodeError, ArrayBuffer> {
+    return arrayBuffer(this.request);
+  }
 
-    formData(): Effect.Effect<never, Error, FormData> {
-        return Effect.tryPromise({
-            try: () => this.request.formData(),
-            catch: error => error as Error
-        })
-    }
+  blob(): Effect.Effect<never, DecodeError, Blob> {
+    return blob(this.request);
+  }
 
-    json(): Effect.Effect<never, Error, any> {
-        return Effect.tryPromise({
-            try: () => this.request.json(),
-            catch: error => error as Error
-        })
-    }
+  formData(): Effect.Effect<never, DecodeError, FormData> {
+    return formData(this.request);
+  }
 
-    text(): Effect.Effect<never, Error, string> {
-        return Effect.tryPromise({
-            try: () => this.request.text(),
-            catch: error => error as Error
-        })
-    }
+  json(): Effect.Effect<never, DecodeError, any> {
+    return json(this.request);
+  }
 
-    pipe() {
-        return pipeArguments(this, arguments)
-    }
+  text(): Effect.Effect<never, DecodeError, string> {
+    return text(this.request);
+  }
 }
+
+export const make = (url: string | URL, init?: RequestInit) =>
+  new Request(url, init);
+
+export const map = dual<
+  <B>(fn: (request: Request) => B) => (request: Request) => B,
+  <B>(request: Request, fn: (request: Request) => B) => B
+>(2, (request, fn) => fn(request));
+
+export const appendBody = (body: Body) => {
+  return (request: HttpRequest) => {
+    const { headers = {}, ...init } = request.init ?? {};
+    return new Request(request.url, {
+      ...init,
+      body: body.value,
+      headers: { ...headers, ...body.headers },
+    });
+  };
+};

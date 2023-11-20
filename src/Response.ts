@@ -1,1 +1,1 @@
-export * from './internal/response.js'
+export * from './internal/response/mod.js'
