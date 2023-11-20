@@ -8,8 +8,8 @@ import * as Request from "../src/Request.js";
 import * as Interceptor from "../src/Interceptor.js";
 import { Level, Logger } from "../src/Logger.js";
 
-import * as AdapterFetch from "../src/adapters/fetch.js";
-import { Interceptor as Intercept } from "effect-fetch/internal/intercept.js";
+import * as AdapterFetch from "../src/adapters/Fetch.js";
+import { Interceptor as Intercept } from "effect-fetch/internal/interceptor.js";
 
 const program = Effect.gen(function* (_) {
   const result = yield* _(Fetch.fetch_("https://reqres.in/api/users"));

@@ -5,30 +5,28 @@ import type { Effect } from "effect/Effect";
 import { DecodeError } from "./internal/error.js";
 import * as internal from "./internal/request.js";
 import { Body } from "./internal/body.js";
+import { HttpRequest } from "./internal/request.js";
 
 /**
  * @since 1.0.0
  * @category constructors
  */
-export const make: (
-  url: string | URL,
-  init?: RequestInit | undefined
-) => Request = internal.make;
+export const make: (url: string | URL, init?: RequestInit) => HttpRequest = internal.make
 
 /**
  * @since 1.0.0
  * @category mapping
  */
 export const map: {
-  <B>(fn: (request: Request) => B): (request: Request) => B;
-  <B>(request: Request, fn: (request: Request) => B): B;
+  <B>(fn: (request: HttpRequest) => B): (request: HttpRequest) => B;
+  <B>(request: HttpRequest, fn: (request: HttpRequest) => B): B;
 } = internal.map;
 
 /**
  * @since 1.0.0
  * @category mapping
  */
-export const appendBody: (body: Body) => (request: internal.HttpRequest) => Request = internal.appendBody
+export const appendBody: (body: Body) => (request: HttpRequest) => Request = internal.appendBody
 
 /**
  * @since 1.0.0

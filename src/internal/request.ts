@@ -18,7 +18,7 @@ export class HttpRequest {
   private _request: Request | null = null;
 
   constructor(
-    readonly url_: string | URL | HttpRequest,
+    private _url: string | URL | HttpRequest,
     readonly init?: RequestInit
   ) {}
 
@@ -28,9 +28,9 @@ export class HttpRequest {
     }
 
     const req =
-      this.url_ instanceof HttpRequest
-        ? this.url_.request
-        : new Request(this.url_, this.init);
+      this._url instanceof HttpRequest
+        ? this._url.request
+        : new Request(this._url, this.init);
     this._request = req;
     return req;
   }
@@ -121,11 +121,11 @@ export class HttpRequest {
 }
 
 export const make = (url: string | URL, init?: RequestInit) =>
-  new Request(url, init);
+  new HttpRequest(url, init);
 
 export const map = dual<
-  <B>(fn: (request: Request) => B) => (request: Request) => B,
-  <B>(request: Request, fn: (request: Request) => B) => B
+  <B>(fn: (request: HttpRequest) => B) => (request: HttpRequest) => B,
+  <B>(request: HttpRequest, fn: (request: HttpRequest) => B) => B
 >(2, (request, fn) => fn(request));
 
 export const appendBody = (body: Body) => {
