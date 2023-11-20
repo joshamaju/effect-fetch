@@ -1,3 +1,6 @@
+/**
+ * @since 1.0.0
+ */
 import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
@@ -74,6 +77,9 @@ function logHeader(headers: Headers, headersToRedact: string[]) {
   })
 }
 
+/**
+ * @since 1.0.0
+ */
 const logger = (level: Level): Interceptor => {
   return (context) => {
     return Effect.gen(function* (_) {
