@@ -6,7 +6,7 @@ import * as Fetch from "../src/Fetch.js";
 import * as Result from "../src/Response.js";
 import * as Request from "../src/Request.js";
 import * as Interceptor from "../src/Interceptor.js";
-import { Level, Logger } from "../src/Logger.js";
+import { Level, Logger } from "../src/interceptors/Logger.js";
 
 import * as AdapterFetch from "../src/adapters/Fetch.js";
 import { Interceptor as Intercept } from "effect-fetch/internal/interceptor.js";

@@ -1,17 +1,13 @@
+import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
-import * as L from "effect/Logger";
-import * as LL from "effect/LogLevel";
-import * as List from "effect/List";
-import * as LogSpan from "effect/LogSpan";
-import * as FiberId from "effect/FiberId";
-import * as Cause from "effect/Cause";
 import * as HashMap from "effect/HashMap";
+import * as List from "effect/List";
+import * as L from "effect/Logger";
 
-import { Interceptor } from "./internal/intercept.js";
-import { HttpRequest } from "./internal/request.js";
-import { json, text } from "./Response.js";
 import { pipe } from "effect/Function";
+import { Interceptor } from "../internal/interceptor.js";
+import { text } from "../Response.js";
 
 // https://github.com/square/okhttp/blob/30780c879bd0d28b49f264fac2fe05da85aef3ad/okhttp-logging-interceptor/src/main/kotlin/okhttp3/logging/HttpLoggingInterceptor.kt#L50C3-L107C4
 export enum Level {
