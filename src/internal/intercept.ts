@@ -64,6 +64,6 @@ export const intercept = (...interceptors: Array<Interceptor>) => {
     })
 }
 
-export const makeFetch = (fetch: Fetch, ...interceptors: Array<Interceptor>) => {
+export const provide = (fetch: Fetch, ...interceptors: Array<Interceptor>) => {
     return intercept(...interceptors).pipe(Effect.provideService(Fetch, fetch))
 }

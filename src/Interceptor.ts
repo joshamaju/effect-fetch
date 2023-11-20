@@ -1,24 +1,24 @@
-import * as Effect from 'effect/Effect'
+import type { Effect } from "effect/Effect";
 
-import { Fetch } from "./internal/fetch.js"
-import { Interceptor, compose } from "./internal/intercept.js"
-import { HttpRequest } from './internal/request.js'
+import { Fetch } from "./internal/fetch.js";
+import * as internal from "./internal/intercept.js";
+import { Interceptor } from "./internal/intercept.js";
 
-export const intercept = (...interceptors: Array<Interceptor>) => {
-    return Effect.gen(function* (_) {
-        const fetch = yield* _(Fetch)
+/**
+ * Creates the intercepting wrapper around the provided platform adapter
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const makeFetch: (
+  ...interceptors: Array<Interceptor>
+) => Effect<Fetch, never, Fetch> = internal.intercept;
 
-        const handler = compose(({request}) => {
-            const { url, init } = request();
-            return fetch(url, init)
-        })
-
-        const run = handler(interceptors)
-
-        return Fetch.of((...args) => run(new HttpRequest(...args)))
-    })
-}
-
-export const make = (fetch: Fetch, ...interceptors: Array<Interceptor>) => {
-    return intercept(...interceptors).pipe(Effect.provideService(Fetch, fetch))
-}
+/**
+ * @since 1.0.0
+ * @category constructors
+ */
+export const makeAdapter: (
+  fetch: Fetch,
+  ...interceptors: Array<Interceptor>
+) => Effect<never, never, Fetch> = internal.provide;
