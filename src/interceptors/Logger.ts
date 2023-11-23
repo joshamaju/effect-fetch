@@ -7,7 +7,7 @@ import * as Exit from "effect/Exit";
 import * as HashMap from "effect/HashMap";
 import * as List from "effect/List";
 import * as Logger from "effect/Logger";
-import { Interceptor } from "../internal/interceptor.js";
+import * as Interceptor from "../internal/interceptor.js";
 
 // https://github.com/square/okhttp/blob/30780c879bd0d28b49f264fac2fe05da85aef3ad/okhttp-logging-interceptor/src/main/kotlin/okhttp3/logging/HttpLoggingInterceptor.kt#L50C3-L107C4
 export enum Level {
@@ -71,69 +71,83 @@ export enum Level {
 
 function logHeader(headers: Headers, headersToRedact: string[]) {
   return Effect.forEach(headers, ([key, value]) => {
-    return Effect.log(`${key}: ${headersToRedact.includes(key) ? "██" : value}`)
-  })
+    return Effect.log(
+      `${key}: ${headersToRedact.includes(key) ? "██" : value}`
+    );
+  });
 }
 
 /**
  * @since 1.0.0
  */
-const logger = (level: Level, headersToRedact: string[]): Interceptor => {
-  return (context) => {
-    return Effect.gen(function* (_) {
-      const request = context.request();
+const logger = (level: Level, headersToRedact: string[] = []) => {
+  return Effect.gen(function* (_) {
+    const context = yield* _(Interceptor.Context);
+    const request = context.request();
 
-      if (level == Level.NONE) {
-        return yield* _(context.proceed(request));
+    if (level == Level.NONE) {
+      return yield* _(context.proceed(request));
+    }
+
+    const req = request.clone();
+
+    type n = BodyInit;
+    type m = XMLHttpRequestBodyInit;
+
+    const logBody = level == Level.BODY;
+    const logHeaders = logBody || level == Level.HEADERS;
+
+    const method = req.init?.method ?? "GET";
+    let msg = `--> ${method} ${req.url}`;
+
+    if (!logHeaders && req.init?.body) {
+      // incase we get an invalid url while running in node
+      const mock = new Request("www.google.com", req.init);
+      
+      const content = yield* _(
+        Effect.tryPromise(() => mock.text()),
+        Effect.exit
+      );
+
+      if (Exit.isSuccess(content)) {
+        msg += ` (${content.value.length}-byte body)`;
       }
+    }
 
-      const req = request.clone();
+    yield* _(Effect.log(msg));
 
-      const logBody = level == Level.BODY;
-      const logHeaders = logBody || level == Level.HEADERS;
+    if (logHeaders && req.init?.headers) {
+      yield* _(logHeader(new Headers(req.init.headers), headersToRedact));
+    }
 
-      let msg = `--> ${req.method} ${req.url}`;
+    yield* _(Effect.log(`--> END ${method}`));
 
-      if (!logHeaders && req.body) {
-        const content = yield* _(req.text());
-        msg += ` (${content.length}-byte body)`;
-      }
+    let startNs = Date.now();
+    let result = yield* _(context.proceed(req), Effect.exit);
 
-      yield* _(Effect.log(msg));
+    if (Exit.isFailure(result)) {
+      yield* _(Effect.log(`<-- HTTP FAILED: ${Cause.pretty(result.cause)}`));
+      throw result.cause;
+    }
 
-      if (logHeaders) {
-        logHeader(req.headers, headersToRedact)
-      }
+    const tookMs = Date.now() - startNs;
+    const response = result.value;
+    const res = response.clone();
 
-      yield* _(Effect.log(`--> END ${req.method}`));
-
-      let startNs = Date.now();
-      let result = yield* _(context.proceed(req), Effect.exit);
-
-      if (Exit.isFailure(result)) {
-        yield* _(Effect.log(`<-- HTTP FAILED: ${Cause.pretty(result.cause)}`));
-        throw result.cause;
-      }
-
-      const tookMs = Date.now() - startNs;
-      const response = result.value
-      const res = response.clone();
-
-      yield* _(Effect.log(`<-- ${res.status} ${res.statusText} ${res.url} (${tookMs}ms)`));
-
-      if (logHeaders) {
-        logHeader(res.headers, headersToRedact)
-      }
-
-      if (!logBody) {
-        yield* _(Effect.log("<-- END HTTP"))
-      }
-
-      return response;
-    }).pipe(
-      Effect.provide(Logger.replace(Logger.defaultLogger, stringLogger))
+    yield* _(
+      Effect.log(`<-- ${res.status} ${res.statusText} ${res.url} (${tookMs}ms)`)
     );
-  };
+
+    if (logHeaders) {
+      yield* _(logHeader(res.headers, headersToRedact));
+    }
+
+    if (!logBody) {
+      yield* _(Effect.log("<-- END HTTP"));
+    }
+
+    return response;
+  }).pipe(Effect.provide(Logger.replace(Logger.defaultLogger, stringLogger)));
 };
 
 export const stringLogger = Logger.make(
@@ -176,11 +190,11 @@ export const stringLogger = Logger.make(
         }
 
         // output = output + filterKeyName(key);
-        output = output + `[${key}:${serializeUnknown(value)}]`
+        output = output + `[${key}:${serializeUnknown(value)}]`;
       }
     }
 
-    const strMessage = message as string
+    const strMessage = message as string;
 
     if (strMessage.length > 0) {
       output = output + " " + strMessage;

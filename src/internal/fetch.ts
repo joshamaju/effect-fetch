@@ -27,5 +27,5 @@ export const fetch_ = flow(
 
 export const make = (fetch: Fetch) => Layer.succeed(Fetch, fetch);
 
-export const makeEffect = <R, E>(fetch: Effect.Effect<R, E, Fetch>) =>
+export const fromEffect = <R, E>(fetch: Effect.Effect<R, E, Fetch>) =>
   Layer.effect(Fetch, fetch);

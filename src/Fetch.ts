@@ -2,11 +2,11 @@
  * @since 1.0.0
  */
 import type { Effect } from "effect/Effect";
+import { Layer } from "effect/Layer";
 import * as internal from "./internal/fetch.js";
 import { Fetch } from "./internal/fetch.js";
 import { HttpError } from "./internal/error.js";
 import { HttpResponse } from "./internal/response/index.js";
-import { Layer } from "effect/Layer";
 
 /**
  * @since 1.0.0
@@ -42,6 +42,6 @@ export const make: (fetch: Fetch) => Layer<never, never, Fetch> = internal.make;
  * @since 1.0.0
  * @category constructors
  */
-export const makeEffect: <R, E>(
+export const fromEffect: <R, E>(
   fetch: Effect<R, E, Fetch>
-) => Layer<R, E, Fetch> = internal.makeEffect;
+) => Layer<R, E, Fetch> = internal.fromEffect;

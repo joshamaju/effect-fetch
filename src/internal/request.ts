@@ -28,95 +28,19 @@ export class HttpRequest {
     }
 
     const req =
-      this._url instanceof HttpRequest
-        ? this._url.request
-        : new Request(this._url, this.init);
+      this.url instanceof HttpRequest
+        ? this.url.request
+        : new Request(this.url, this.init);
     this._request = req;
     return req;
   }
 
-  get url(): string {
-    return this.request.url;
-  }
-
-  get cache(): RequestCache {
-    return this.request.cache;
-  }
-
-  get credentials(): RequestCredentials {
-    return this.request.credentials;
-  }
-
-  get destination(): RequestDestination {
-    return this.request.destination;
-  }
-
-  get headers(): Headers {
-    return this.request.headers;
-  }
-
-  get integrity(): string {
-    return this.request.integrity;
-  }
-
-  get keepalive(): boolean {
-    return this.request.keepalive;
-  }
-
-  get method(): string {
-    return this.request.method;
-  }
-
-  get mode(): RequestMode {
-    return this.request.mode;
-  }
-
-  get redirect(): RequestRedirect {
-    return this.request.redirect;
-  }
-
-  get referrer(): string {
-    return this.request.referrer;
-  }
-
-  get referrerPolicy(): ReferrerPolicy {
-    return this.request.referrerPolicy;
-  }
-
-  get signal(): AbortSignal {
-    return this.request.signal;
-  }
-
-  get body(): ReadableStream<Uint8Array> | null {
-    return this.request.body;
-  }
-
-  get bodyUsed(): boolean {
-    return this.request.bodyUsed;
+  get url(): string | URL {
+    return this._url instanceof HttpRequest ? this._url.url : this._url;
   }
 
   clone(): HttpRequest {
     return new HttpRequest(this.url, this.init);
-  }
-
-  arrayBuffer(): Effect.Effect<never, DecodeError, ArrayBuffer> {
-    return arrayBuffer(this.request);
-  }
-
-  blob(): Effect.Effect<never, DecodeError, Blob> {
-    return blob(this.request);
-  }
-
-  formData(): Effect.Effect<never, DecodeError, FormData> {
-    return formData(this.request);
-  }
-
-  json(): Effect.Effect<never, DecodeError, any> {
-    return json(this.request);
-  }
-
-  text(): Effect.Effect<never, DecodeError, string> {
-    return text(this.request);
   }
 }
 
