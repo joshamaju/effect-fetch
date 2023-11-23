@@ -15,7 +15,7 @@ export interface Context {
 export interface Interceptor<R, E>
   extends Effect.Effect<R | Context, E, Response> {}
 
-export type Interceptors<R, E> = Array<Interceptor<R, E>>
+export type Interceptors<R, E> = Array<Interceptor<R, E>>;
 
 export type Merge<
   I extends Interceptors<any, any>,
@@ -82,12 +82,17 @@ export const intercept = <R, E>(interceptors: Array<Interceptor<R, E>>) => {
   });
 };
 
-export const makeAdapter = <R, E>(
-  fetch: Fetch,
-  interceptors: Interceptors<R, E>
-): Effect.Effect<Exclude<R, Context>, E, Fetch> => {
+export const makeAdapter = dual<
+  <R, E>(
+    interceptors: Interceptors<R, E>
+  ) => (fetch: Fetch) => Effect.Effect<Exclude<R, Context>, E, Fetch>,
+  <R, E>(
+    fetch: Fetch,
+    interceptors: Interceptors<R, E>
+  ) => Effect.Effect<Exclude<R, Context>, E, Fetch>
+>(2, (fetch, interceptors) => {
   return intercept(interceptors).pipe(Effect.provideService(Fetch, fetch));
-};
+});
 
 export const empty: Interceptors<never, never> = [];
 

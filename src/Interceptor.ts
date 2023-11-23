@@ -48,7 +48,12 @@ export const makeFetch: <R, E>(
  * @since 1.0.0
  * @category constructors
  */
-export const makeAdapter: <R, E>(
-  fetch: Fetch,
-  interceptors: Interceptors<R, E>
-) => Effect<Exclude<R, Context>, E, Fetch> = internal.makeAdapter;
+export const makeAdapter: {
+  <R, E>(
+    interceptors: Interceptors<R, E>
+  ): (fetch: Fetch) => Effect<Exclude<R, Context>, E, Fetch>;
+  <R, E>(
+    fetch: Fetch,
+    interceptors: Interceptors<R, E>
+  ): Effect<Exclude<R, Context>, E, Fetch>;
+} = internal.makeAdapter;
