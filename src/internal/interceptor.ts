@@ -8,7 +8,7 @@ import { Fetch } from "./fetch.js";
 import { HttpRequest } from "./request.js";
 
 export interface Context {
-  request(): HttpRequest;
+  request: HttpRequest;
   proceed(request: HttpRequest): Effect.Effect<never, HttpError, Response>;
 }
 
@@ -52,7 +52,7 @@ export function compose(initiator: Effect.Effect<Context, any, Response>) {
         }
 
         const context = Context.of({
-          request: () => request,
+          request,
           proceed: (newRequest) => dispatch(i + 1, newRequest),
         });
 
@@ -71,7 +71,7 @@ export const intercept = <R, E>(interceptors: Array<Interceptor<R, E>>) => {
     const handler = compose(
       Effect.gen(function* (_) {
         const { request } = yield* _(Context);
-        const { url, init } = request();
+        const { url, init } = request;
         return yield* _(fetch(url, init));
       })
     );

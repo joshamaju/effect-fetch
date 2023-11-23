@@ -83,7 +83,7 @@ function logHeader(headers: Headers, headersToRedact: string[]) {
 const logger = (level: Level, headersToRedact: string[] = []) => {
   return Effect.gen(function* (_) {
     const context = yield* _(Interceptor.Context);
-    const request = context.request();
+    const request = context.request;
 
     if (level == Level.NONE) {
       return yield* _(context.proceed(request));
@@ -103,7 +103,7 @@ const logger = (level: Level, headersToRedact: string[] = []) => {
     if (!logHeaders && req.init?.body) {
       // incase we get an invalid url while running in node
       const mock = new Request("www.google.com", req.init);
-      
+
       const content = yield* _(
         Effect.tryPromise(() => mock.text()),
         Effect.exit
