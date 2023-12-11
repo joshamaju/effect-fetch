@@ -16,6 +16,7 @@
     "build": "tsc",
     "dev": "tsc --w",
     "docs": "docgen",
+    "test": "vitest run",
     "clean": "rimraf dist",
     "changeset": "changeset",
     "release": "changeset publish",
