@@ -1,24 +1,74 @@
 {
   "name": "effect-fetch",
   "version": "1.0.0",
-  "description": "",
+  "description": "fetch + interceptors + strongly typed errors",
   "type": "module",
   "homepage": "https://github.com/joshamaju/effect-fetch",
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshamaju/effect-fetch.git"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --w",
-    "docs": "docgen"
+    "docs": "docgen",
+    "clean": "rimraf dist",
+    "changeset": "changeset",
+    "release": "changeset publish",
+    "prepublish": "pnpm clean && pnpm build"
   },
-  "keywords": [],
-  "author": "",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "keywords": [
+    "fetch",
+    "http",
+    "effect",
+    "interceptors"
+  ],
+  "author": "Joshua Amaju <joshsemail4work@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@effect/docgen": "^0.3.4",
     "effect": "2.0.0-next.54",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^1.0.4"
   },
   "peerDependencies": {
     "effect": "2.0.0-next.54"
+  },
+  "exports": {
+    "./Fetch": {
+      "import": "./dist/Fetch.js",
+      "types": "./dist/dts/Fetch.d.ts"
+    },
+    "./Request": {
+      "import": "./dist/Request.js",
+      "types": "./dist/dts/Request.d.ts"
+    },
+    "./Response": {
+      "import": "./dist/Response.js",
+      "types": "./dist/dts/Response.d.ts"
+    },
+    "./Interceptor": {
+      "import": "./dist/Interceptor.js",
+      "types": "./dist/dts/Interceptor.d.ts"
+    },
+    "./adapter/*": {
+      "import": "./dist/adapters/*.js",
+      "types": "./dist/dts/adapters/*.d.ts"
+    },
+    "./interceptors/*": {
+      "import": "./dist/interceptors/*.js",
+      "types": "./dist/dts/interceptors/*.d.ts"
+    }
   }
 }
