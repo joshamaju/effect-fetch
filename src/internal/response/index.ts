@@ -1,14 +1,18 @@
-import { flow } from "effect/Function";
 import * as Effect from "effect/Effect";
+import { flow } from "effect/Function";
 import type { Predicate } from "effect/Predicate";
 
 import { DecodeError } from "../error.js";
 import { decode } from "../utils.js";
-import { OkStatusCode, StatusCode } from "./types.js";
+import { NotOkStatusCode, OkStatusCode, StatusCode } from "./types.js";
 
 export class StatusError {
   readonly _tag = "StatusError";
   constructor(readonly response: Response) {}
+}
+
+export interface StatusErrorT<S extends number> extends StatusError {
+  response: Omit<Response, "status"> & { status: S };
 }
 
 export const json = decode((response: Response) => response.json());
@@ -24,24 +28,30 @@ export const arrayBuffer = decode((response: Response) =>
 );
 
 export const filterStatusOk = (response: Response) => {
-  return response.ok
-    ? Effect.succeed(response)
-    : Effect.fail(new StatusError(response));
+  return Effect.if(response.ok, {
+    onTrue: Effect.succeed(response),
+    onFalse: Effect.fail(new StatusError(response)),
+  });
 };
 
-export const filterStatusOkT = flow(filterStatusOk, (response) =>
-  Effect.map(
-    response,
-    (r) => new HttpResponseT<Exclude<StatusCode, OkStatusCode>>(r)
-  )
+export interface ResponseT<S extends StatusCode> extends Response {
+  status: S;
+}
+
+export const filterStatusOkT = flow(
+  filterStatusOk,
+  Effect.mapBoth({
+    onSuccess: (r) => r as ResponseT<OkStatusCode>,
+    onFailure: (e) => e as StatusErrorT<NotOkStatusCode>,
+  })
 );
 
-export const filterStatus =
-  (fn: Predicate<Response>) => (response: Response) => {
-    return fn(response)
-      ? Effect.succeed(response)
-      : Effect.fail(new StatusError(response));
-  };
+export const filterStatus = (response: Response, fn: Predicate<number>) => {
+  return Effect.if(fn(response.status), {
+    onTrue: Effect.succeed(response),
+    onFalse: Effect.fail(new StatusError(response))
+  })
+};
 
 export class HttpResponse {
   constructor(readonly response: Response) {}
@@ -107,11 +117,5 @@ export class HttpResponse {
 
   text(): Effect.Effect<never, DecodeError, string> {
     return text(this.response);
-  }
-}
-
-export class HttpResponseT<S extends StatusCode> extends HttpResponse {
-  get status(): S {
-    return super.status as S;
   }
 }
