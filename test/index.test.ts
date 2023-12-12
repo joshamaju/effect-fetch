@@ -1,15 +1,14 @@
-import { test, describe, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 
-import { pipe } from "effect/Function";
 import * as Effect from "effect/Effect";
-import * as Stream from "effect/Stream";
-import * as Layer from "effect/Layer";
 import * as Either from "effect/Either";
+import { pipe } from "effect/Function";
+import * as Stream from "effect/Stream";
 
 import * as Fetch from "../src/Fetch.js";
+import * as Interceptor from "../src/Interceptor.js";
 import * as Request from "../src/Request.js";
 import * as Response from "../src/Response.js";
-import * as Interceptor from "../src/Interceptor.js";
 import * as Adapter from "../src/adapters/Fetch.js";
 import { DecodeError } from "../src/internal/error.js";
 
