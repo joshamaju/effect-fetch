@@ -99,4 +99,29 @@ describe("Interceptors", () => {
     expect(Either.isLeft(result)).toBeTruthy();
     expect((result as Either.Left<Err, any>).left).toEqual({ _tag: "Err" });
   });
+
+  test("should intercept and change response", async () => {
+    const evil_interceptor = Effect.succeed(
+      new globalThis.Response(JSON.stringify({ data: { id: "😈 evil" } }))
+    );
+
+    const interceptors = pipe(
+      Interceptor.empty,
+      Interceptor.add(base_url_interceptor),
+      Interceptor.add(evil_interceptor),
+    );
+
+    const adapter = Fetch.effect(
+      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+    );
+
+    const result = await pipe(
+      Fetch.fetch("/users/2"),
+      Effect.flatMap(Response.json),
+      Effect.provide(adapter),
+      Effect.runPromise
+    );
+
+    expect(result.data.id).not.toBe(2);
+  });
 });
