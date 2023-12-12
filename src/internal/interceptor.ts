@@ -4,7 +4,7 @@ import * as Cause from "effect/Cause";
 import { dual } from "effect/Function";
 
 import { HttpError } from "./error.js";
-import { Fetch } from "./fetch.js";
+import { Fetch } from "../Fetch.js";
 import { HttpRequest } from "./request.js";
 
 export interface Context {

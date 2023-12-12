@@ -3,10 +3,21 @@
  */
 import type { Effect } from "effect/Effect";
 import { Layer } from "effect/Layer";
+import { Tag } from "effect/Context";
+
 import * as internal from "./internal/fetch.js";
-import { Fetch } from "./internal/fetch.js";
 import { HttpError } from "./internal/error.js";
 import { HttpResponse } from "./internal/response/index.js";
+import { HttpRequest } from "./internal/request.js";
+
+export interface Fetch {
+  (
+    url: string | URL | HttpRequest,
+    init?: RequestInit
+  ): Effect<never, HttpError, Response>;
+}
+
+export const Fetch = Tag<Fetch>("effect-fetch/Fetch");
 
 /**
  * @since 1.0.0
@@ -26,7 +37,7 @@ export const fetch: (
 export const fetch_: (
   url: string | URL,
   init?: RequestInit | undefined
-) => Effect<internal.Fetch, HttpError, HttpResponse> = internal.fetch_;
+) => Effect<Fetch, HttpError, HttpResponse> = internal.fetch_;
 
 /**
  * Constructs a `Fetch` layer using the given platform adapter
@@ -42,6 +53,6 @@ export const make: (fetch: Fetch) => Layer<never, never, Fetch> = internal.make;
  * @since 1.0.0
  * @category constructors
  */
-export const fromEffect: <R, E>(
+export const effect: <R, E>(
   fetch: Effect<R, E, Fetch>
-) => Layer<R, E, Fetch> = internal.fromEffect;
+) => Layer<R, E, Fetch> = internal.effect;

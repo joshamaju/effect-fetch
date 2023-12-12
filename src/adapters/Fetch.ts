@@ -1,5 +1,5 @@
 import * as Effect from 'effect/Effect'
-import { Fetch } from '../internal/fetch.js'
+import { Fetch } from '../Fetch.js'
 import { HttpError } from '../internal/error.js'
 import { HttpRequest } from '../internal/request.js'
 

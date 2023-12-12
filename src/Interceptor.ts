@@ -2,7 +2,7 @@
  * @since 1.0.0
  */
 import type { Effect } from "effect/Effect";
-import { Fetch } from "./internal/fetch.js";
+import { Fetch } from "./Fetch.js";
 import { Tag } from "effect/Context";
 import * as internal from "./internal/interceptor.js";
 import { Interceptor, Interceptors, Merge } from "./internal/interceptor.js";

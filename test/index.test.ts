@@ -64,7 +64,7 @@ describe("Interceptors", () => {
     const newAdapter = pipe(
       Interceptor.makeFetch([base_url_interceptor]),
       Effect.provide(adapter),
-      Fetch.fromEffect
+      Fetch.effect
     );
 
     const result = await pipe(
@@ -84,7 +84,7 @@ describe("Interceptors", () => {
       Interceptor.add(error_interceptor)
     );
 
-    const adapter = Fetch.fromEffect(
+    const adapter = Fetch.effect(
       Interceptor.makeAdapter(Adapter.fetch, interceptors)
     );
 
