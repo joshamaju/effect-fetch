@@ -1,8 +1,6 @@
-import * as Effect from "effect/Effect";
-import { DecodeError } from "./error.js";
-import { decode } from "./utils.js";
 import { dual } from "effect/Function";
 import { Body } from "./body.js";
+import { decode } from "./utils.js";
 
 export const json = decode((request: Request) => request.json());
 
