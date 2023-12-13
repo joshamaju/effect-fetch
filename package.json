@@ -1,6 +1,6 @@
 {
   "name": "effect-fetch",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "fetch + interceptors + strongly typed errors",
   "type": "module",
   "homepage": "https://github.com/joshamaju/effect-fetch",
@@ -18,6 +18,7 @@
     "test": "vitest run",
     "clean": "rimraf dist",
     "changeset": "changeset",
+    "version": "changeset version",
     "release": "changeset publish",
     "prepublish": "pnpm clean && pnpm build"
   },
