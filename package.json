@@ -5,8 +5,7 @@
   "type": "module",
   "homepage": "https://github.com/joshamaju/effect-fetch",
   "publishConfig": {
-    "access": "public",
-    "directory": "dist"
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -29,6 +28,7 @@
   "keywords": [
     "fetch",
     "http",
+    "ajax",
     "effect",
     "interceptors"
   ],
