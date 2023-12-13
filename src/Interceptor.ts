@@ -39,7 +39,7 @@ export const add: {
  * @category constructors
  */
 export const makeFetch: <R, E>(
-  interceptors: Array<Interceptor<R, E>>
+  interceptors: Interceptors<R, E>
 ) => Effect<Exclude<R, Context> | Fetch, never, Fetch> = internal.intercept;
 
 /**
