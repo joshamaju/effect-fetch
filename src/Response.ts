@@ -15,9 +15,9 @@ import { Predicate } from "effect/Predicate";
 export {StatusCode, OkStatusCode, NotOkStatusCode} from './internal/response/types.js'
 
 /**
- * @since 1.0.0
+ * @since 1.1.0
  */
-export {StatusError} from './internal/response/index.js'
+export {StatusError, StatusErrorT} from './internal/response/index.js'
 
 /**
  * @since 1.0.0
