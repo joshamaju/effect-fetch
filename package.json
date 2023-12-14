@@ -1,6 +1,6 @@
 {
   "name": "effect-fetch",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "fetch + interceptors + strongly typed errors",
   "type": "module",
   "homepage": "https://github.com/joshamaju/effect-fetch",
