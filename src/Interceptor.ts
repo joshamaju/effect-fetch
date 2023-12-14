@@ -35,7 +35,7 @@ export const add: {
 /**
  * Creates the intercepting wrapper around the provided platform adapter
  *
- * @since 1.0.0
+ * @since 1.1.1
  * @category constructors
  */
 export const makeFetch: <R, E>(
