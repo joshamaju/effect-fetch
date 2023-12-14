@@ -40,7 +40,7 @@ export const add: {
  */
 export const makeFetch: <R, E>(
   interceptors: Interceptors<R, E>
-) => Effect<Exclude<R, Context> | Fetch, never, Fetch> = internal.intercept;
+) => Effect<Exclude<R, Context> | Fetch, E, Fetch> = internal.intercept;
 
 /**
  * Provides the given platform adapter to the interceptor `Fetch` wrapper

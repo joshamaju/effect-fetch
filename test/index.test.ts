@@ -84,14 +84,16 @@ describe("Interceptors", () => {
       Interceptor.add(error_interceptor)
     );
 
-    const adapter = Fetch.effect(
-      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+    const newAdapter = pipe(
+      Interceptor.makeFetch(interceptors),
+      Effect.provide(adapter),
+      Fetch.effect
     );
 
     const result = await pipe(
       Fetch.fetch("/users/2"),
       Effect.flatMap(Response.json),
-      Effect.provide(adapter),
+      Effect.provide(newAdapter),
       Effect.either,
       Effect.runPromise
     );

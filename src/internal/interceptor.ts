@@ -64,7 +64,7 @@ export function compose(initiator: Effect.Effect<Context, any, Response>) {
     };
 }
 
-export const intercept = <R, E>(interceptors: Array<Interceptor<R, E>>) => {
+export const intercept = <R, E>(interceptors: Interceptors<R, E>) => {
   return Effect.gen(function* (_) {
     const fetch = yield* _(Fetch);
 
