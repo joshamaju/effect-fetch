@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.0
+
+### Minor Changes
+
+- 94cb727: refactor interceptors from array to chunk
+
 ## 1.1.1
 
 ### Patch Changes
