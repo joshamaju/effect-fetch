@@ -6,10 +6,10 @@ import { pipe } from "effect/Function";
 import * as Stream from "effect/Stream";
 
 import * as Fetch from "../src/Fetch.js";
-import * as Interceptor from "../src/Interceptor.js";
 import * as Request from "../src/Request.js";
 import * as Response from "../src/Response.js";
 import * as Adapter from "../src/adapters/Fetch.js";
+import * as Interceptor from "../src/Interceptor.js";
 import { DecodeError } from "../src/internal/error.js";
 
 const adapter = Fetch.make(Adapter.fetch);
@@ -22,11 +22,11 @@ const base_url_interceptor = Effect.flatMap(Interceptor.Context, (_) => {
   return _.proceed(Request.make(newUrl, request.init));
 });
 
-class Err extends Error {
+class Err {
   readonly _tag = "Err";
 }
 
-const error_interceptor = Effect.fail(new Err("error"));
+const error_interceptor = Effect.fail(new Err());
 
 test("google", async () => {
   const result = await pipe(
@@ -62,7 +62,7 @@ test("streaming", async () => {
 describe("Interceptors", () => {
   test("single", async () => {
     const newAdapter = pipe(
-      Interceptor.makeFetch([base_url_interceptor]),
+      Interceptor.makeFetch(Interceptor.of(base_url_interceptor)),
       Effect.provide(adapter),
       Fetch.effect
     );
@@ -79,7 +79,7 @@ describe("Interceptors", () => {
 
   test("error", async () => {
     const interceptors = pipe(
-      Interceptor.empty,
+      Interceptor.empty(),
       Interceptor.add(base_url_interceptor),
       Interceptor.add(error_interceptor)
     );
@@ -108,7 +108,7 @@ describe("Interceptors", () => {
     );
 
     const interceptors = pipe(
-      Interceptor.empty,
+      Interceptor.empty(),
       Interceptor.add(base_url_interceptor),
       Interceptor.add(evil_interceptor),
     );

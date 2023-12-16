@@ -2,6 +2,8 @@
  * @since 1.0.0
  */
 import type { Effect } from "effect/Effect";
+import * as Chunk from 'effect/Chunk'
+
 import { Fetch } from "./Fetch.js";
 import { Tag } from "effect/Context";
 import * as internal from "./internal/interceptor.js";
@@ -12,11 +14,17 @@ export interface Context extends internal.Context {}
 export const Context: Tag<internal.Context, internal.Context> =
   internal.Context;
 
+  /**
+ * @since 1.2.0
+ * @category constructors
+ */
+export const of: <R, E>(interceptor: Interceptor<R, E>) => Interceptors<R, E> = Chunk.of
+
 /**
  * @since 1.0.0
  * @category constructors
  */
-export const empty: Interceptors<never, never> = internal.empty;
+export const empty: () => Interceptors<never, never> = Chunk.empty
 
 /**
  * @since 1.0.0
@@ -30,12 +38,12 @@ export const add: {
     interceptors: Interceptors<R, E>,
     interceptor: T
   ): Merge<Interceptors<R, E>, T>;
-} = internal.add;
+} = Chunk.append;
 
 /**
  * Creates the intercepting wrapper around the provided platform adapter
  *
- * @since 1.1.1
+ * @since 1.0.0
  * @category constructors
  */
 export const makeFetch: <R, E>(

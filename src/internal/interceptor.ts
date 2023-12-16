@@ -1,6 +1,8 @@
 import { Tag } from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Cause from "effect/Cause";
+import * as Chunk from 'effect/Chunk'
+import * as Option from 'effect/Option'
 import { dual } from "effect/Function";
 
 import { HttpError } from "./error.js";
@@ -15,7 +17,7 @@ export interface Context {
 export interface Interceptor<R, E>
   extends Effect.Effect<R | Context, E, Response> {}
 
-export type Interceptors<R, E> = Array<Interceptor<R, E>>;
+export type Interceptors<R, E> = Chunk.Chunk<Interceptor<R, E>>;
 
 export type Merge<
   I extends Interceptors<any, any>,
@@ -29,7 +31,7 @@ export type Merge<
 export const Context = Tag<Context>();
 
 export function compose(initiator: Effect.Effect<Context, any, Response>) {
-  return <R, E>(interceptors: Array<Interceptor<R, E>>) =>
+  return <R, E>(interceptors: Interceptors<R, E>) =>
     (request: HttpRequest) => {
       let index = -1;
 
@@ -45,7 +47,7 @@ export function compose(initiator: Effect.Effect<Context, any, Response>) {
 
         index = i;
 
-        let handler = interceptors[i]?.pipe(Effect.withSpan("Interceptor"));
+        let handler = Option.getOrNull(Chunk.get(interceptors, i))
 
         if (!handler || i === interceptors.length) {
           handler = initiator;
@@ -92,18 +94,4 @@ export const makeAdapter = dual<
   ) => Effect.Effect<Exclude<R, Context>, E, Fetch>
 >(2, (fetch, interceptors) => {
   return intercept(interceptors).pipe(Effect.provideService(Fetch, fetch));
-});
-
-export const empty: Interceptors<never, never> = [];
-
-export const add: {
-  <T extends Interceptor<any, any>>(
-    interceptor: T
-  ): <R, E>(interceptors: Interceptors<R, E>) => Merge<Interceptors<R, E>, T>;
-  <R, E, T extends Interceptor<any, any>>(
-    interceptors: Interceptors<R, E>,
-    interceptor: T
-  ): Merge<Interceptors<R, E>, T>;
-} = dual(2, (interceptors, interceptor) => {
-  return [...interceptors, interceptor];
 });
