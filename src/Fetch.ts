@@ -10,6 +10,10 @@ import { HttpError } from "./internal/error.js";
 import { HttpResponse } from "./internal/response/index.js";
 import { HttpRequest } from "./internal/request.js";
 
+/**
+ * @since 1.0.0
+ * @category model
+ */
 export interface Fetch {
   (
     url: string | URL | HttpRequest,
@@ -17,6 +21,10 @@ export interface Fetch {
   ): Effect<never, HttpError, Response>;
 }
 
+/**
+ * @since 1.0.0
+ * @category tag
+ */
 export const Fetch = Tag<Fetch>("effect-fetch/Fetch");
 
 /**
@@ -53,6 +61,5 @@ export const make: (fetch: Fetch) => Layer<never, never, Fetch> = internal.make;
  * @since 1.0.0
  * @category constructors
  */
-export const effect: <R, E>(
-  fetch: Effect<R, E, Fetch>
-) => Layer<R, E, Fetch> = internal.effect;
+export const effect: <R, E>(fetch: Effect<R, E, Fetch>) => Layer<R, E, Fetch> =
+  internal.effect;
