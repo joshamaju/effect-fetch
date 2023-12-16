@@ -16,6 +16,8 @@ jobs:
 
       - name: install pnpm
         uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: get pnpm store directory
         shell: bash
