@@ -2,29 +2,38 @@
  * @since 1.0.0
  */
 import type { Effect } from "effect/Effect";
-import * as Chunk from 'effect/Chunk'
+import * as Chunk from "effect/Chunk";
 
 import { Fetch } from "./Fetch.js";
 import { Tag } from "effect/Context";
 import * as internal from "./internal/interceptor.js";
 import { Interceptor, Interceptors, Merge } from "./internal/interceptor.js";
 
+/**
+ * @since 1.0.0
+ * @category model
+ */
 export interface Context extends internal.Context {}
 
+/**
+ * @since 1.0.0
+ * @category tag
+ */
 export const Context: Tag<internal.Context, internal.Context> =
   internal.Context;
 
-  /**
+/**
  * @since 1.2.0
  * @category constructors
  */
-export const of: <R, E>(interceptor: Interceptor<R, E>) => Interceptors<R, E> = Chunk.of
+export const of: <R, E>(interceptor: Interceptor<R, E>) => Interceptors<R, E> =
+  Chunk.of;
 
 /**
  * @since 1.0.0
  * @category constructors
  */
-export const empty: () => Interceptors<never, never> = Chunk.empty
+export const empty: () => Interceptors<never, never> = Chunk.empty;
 
 /**
  * @since 1.0.0
