@@ -64,6 +64,10 @@
       "import": "./dist/Interceptor.js",
       "types": "./dist/dts/Interceptor.d.ts"
     },
+    "./Error": {
+      "import": "./dist/Error.js",
+      "types": "./dist/dts/Error.d.ts"
+    },
     "./adapter/*": {
       "import": "./dist/adapters/*.js",
       "types": "./dist/dts/adapters/*.d.ts"
