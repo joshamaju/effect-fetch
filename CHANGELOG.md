@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.1
+
+### Patch Changes
+
+- f0164e6: Include Error module in package exports
+
 ## 1.2.0
 
 ### Minor Changes
