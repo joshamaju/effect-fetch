@@ -1,34 +1,13 @@
-import { Tag } from "effect/Context";
-import * as Effect from "effect/Effect";
 import * as Cause from "effect/Cause";
 import * as Chunk from "effect/Chunk";
-import * as Option from "effect/Option";
+import * as Effect from "effect/Effect";
 import { dual } from "effect/Function";
+import * as Option from "effect/Option";
 
-import { HttpError } from "./error.js";
 import { Fetch } from "../Fetch.js";
+import { Context, Interceptors } from "../Interceptor.js";
+import { HttpError } from "./error.js";
 import { HttpRequest } from "./request.js";
-
-export interface Context {
-  request: HttpRequest;
-  proceed(request: HttpRequest): Effect.Effect<never, HttpError, Response>;
-}
-
-export interface Interceptor<R, E>
-  extends Effect.Effect<R | Context, E, Response> {}
-
-export type Interceptors<R, E> = Chunk.Chunk<Interceptor<R, E>>;
-
-export type Merge<
-  I extends Interceptors<any, any>,
-  T extends Interceptor<any, any>,
-> = I extends Interceptors<infer R1, infer E1>
-  ? T extends Interceptor<infer R2, infer E2>
-    ? Interceptors<R1 | R2, E1 | E2>
-    : never
-  : never;
-
-export const Context = Tag<Context>();
 
 export function compose(initiator: Effect.Effect<Context, any, Response>) {
   return <R, E>(interceptors: Interceptors<R, E>) =>
