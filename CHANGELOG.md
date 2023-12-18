@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.2
+
+### Patch Changes
+
+- 121ed1e: Upgrade effect
+
 ## 1.2.1
 
 ### Patch Changes
