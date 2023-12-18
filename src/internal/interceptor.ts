@@ -1,8 +1,8 @@
 import { Tag } from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Cause from "effect/Cause";
-import * as Chunk from 'effect/Chunk'
-import * as Option from 'effect/Option'
+import * as Chunk from "effect/Chunk";
+import * as Option from "effect/Option";
 import { dual } from "effect/Function";
 
 import { HttpError } from "./error.js";
@@ -41,13 +41,13 @@ export function compose(initiator: Effect.Effect<Context, any, Response>) {
       ): Effect.Effect<never, HttpError, Response> {
         if (i <= index) {
           return Effect.die(
-            Cause.RuntimeException("proceed() called multiple times")
+            new Cause.RuntimeException("proceed() called multiple times")
           );
         }
 
         index = i;
 
-        let handler = Option.getOrNull(Chunk.get(interceptors, i))
+        let handler = Option.getOrNull(Chunk.get(interceptors, i));
 
         if (!handler || i === interceptors.length) {
           handler = initiator;
