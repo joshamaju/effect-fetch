@@ -82,10 +82,6 @@ function logHeader(headers: Headers, headersToRedact: string[]) {
   });
 }
 
-/**
- * @since 1.0.0
- * @category interceptor
- */
 const logger = (level: Level, headersToRedact: string[] = []) => {
   return Effect.gen(function* (_) {
     const context = yield* _(Interceptor.Context);
@@ -218,4 +214,10 @@ const serializeUnknown = (u: unknown): string => {
   }
 };
 
-export { logger as Logger };
+export {
+  /**
+   * @since 1.0.0
+   * @category interceptor
+   */
+  logger as Logger,
+};
