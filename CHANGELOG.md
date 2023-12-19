@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.3
+
+### Patch Changes
+
+- 64f5280: Fix Interceptor reference in Logger interceptor
+
 ## 1.2.2
 
 ### Patch Changes
