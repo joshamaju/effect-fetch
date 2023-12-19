@@ -9,7 +9,12 @@ import * as List from "effect/List";
 import * as Logger from "effect/Logger";
 import * as Interceptor from "../Interceptor.js";
 
-// https://github.com/square/okhttp/blob/30780c879bd0d28b49f264fac2fe05da85aef3ad/okhttp-logging-interceptor/src/main/kotlin/okhttp3/logging/HttpLoggingInterceptor.kt#L50C3-L107C4
+// Reference: https://github.com/square/okhttp/blob/30780c879bd0d28b49f264fac2fe05da85aef3ad/okhttp-logging-interceptor/src/main/kotlin/okhttp3/logging/HttpLoggingInterceptor.kt#L50C3-L107C4
+
+/**
+ * @since 1.0.0
+ * @category model
+ */
 export enum Level {
   /** No logs. */
   NONE,
@@ -79,6 +84,7 @@ function logHeader(headers: Headers, headersToRedact: string[]) {
 
 /**
  * @since 1.0.0
+ * @category interceptor
  */
 const logger = (level: Level, headersToRedact: string[] = []) => {
   return Effect.gen(function* (_) {
@@ -150,7 +156,7 @@ const logger = (level: Level, headersToRedact: string[] = []) => {
   }).pipe(Effect.provide(Logger.replace(Logger.defaultLogger, stringLogger)));
 };
 
-export const stringLogger = Logger.make(
+const stringLogger = Logger.make(
   ({ annotations, cause, date, logLevel, message, spans }) => {
     const nowMillis = date.getTime();
 
@@ -204,7 +210,7 @@ export const stringLogger = Logger.make(
   }
 );
 
-export const serializeUnknown = (u: unknown): string => {
+const serializeUnknown = (u: unknown): string => {
   try {
     return typeof u === "object" ? JSON.stringify(u) : String(u);
   } catch (_) {
