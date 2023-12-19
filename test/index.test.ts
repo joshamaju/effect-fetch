@@ -8,7 +8,7 @@ import * as Stream from "effect/Stream";
 import * as Fetch from "../src/Fetch.js";
 import * as Request from "../src/Request.js";
 import * as Response from "../src/Response.js";
-import * as Adapter from "../src/adapters/Fetch.js";
+import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Interceptor from "../src/Interceptor.js";
 import { DecodeError } from "../src/internal/error.js";
 
