@@ -7,7 +7,7 @@ import * as Exit from "effect/Exit";
 import * as HashMap from "effect/HashMap";
 import * as List from "effect/List";
 import * as Logger from "effect/Logger";
-import * as Interceptor from "../internal/interceptor.js";
+import * as Interceptor from "../Interceptor.js";
 
 // https://github.com/square/okhttp/blob/30780c879bd0d28b49f264fac2fe05da85aef3ad/okhttp-logging-interceptor/src/main/kotlin/okhttp3/logging/HttpLoggingInterceptor.kt#L50C3-L107C4
 export enum Level {
