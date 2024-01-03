@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.4
+
+### Patch Changes
+
+- 0baf89c: re-export all modules from single entry point
+
 ## 1.2.3
 
 ### Patch Changes
