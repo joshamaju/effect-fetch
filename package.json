@@ -4,6 +4,7 @@
   "description": "fetch + interceptors + strongly typed errors",
   "type": "module",
   "homepage": "https://github.com/joshamaju/effect-fetch",
+  "main": "./dist/index.js",
   "publishConfig": {
     "access": "public"
   },
