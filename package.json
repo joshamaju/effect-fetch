@@ -5,6 +5,7 @@
   "type": "module",
   "homepage": "https://github.com/joshamaju/effect-fetch",
   "main": "./dist/index.js",
+  "types": "./dist/dts/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
