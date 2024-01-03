@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.6
+
+### Patch Changes
+
+- 2929a20: include package typescript types
+
 ## 1.2.5
 
 ### Patch Changes
