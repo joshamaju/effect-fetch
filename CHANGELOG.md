@@ -1,5 +1,11 @@
 # effect-fetch
 
+## 1.2.5
+
+### Patch Changes
+
+- 17f50a3: add package main entry
+
 ## 1.2.4
 
 ### Patch Changes
