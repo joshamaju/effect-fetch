@@ -4,6 +4,7 @@ import * as Effect from "effect/Effect";
 import * as Either from "effect/Either";
 import { pipe } from "effect/Function";
 import * as Stream from "effect/Stream";
+import * as Duration from "effect/Duration";
 
 import * as Fetch from "../src/Fetch.js";
 import * as Request from "../src/Request.js";
@@ -12,12 +13,15 @@ import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Interceptor from "../src/Interceptor.js";
 import { DecodeError } from "../src/internal/error.js";
 
+import * as BaseUrl from "../src/Interceptors/Url.js";
+
 const adapter = Fetch.make(Adapter.fetch);
+
+const base_url = "https://reqres.in/api";
 
 const base_url_interceptor = Effect.flatMap(Interceptor.Context, (_) => {
   const request = _.request.clone();
   const url = request.url.toString();
-  const base_url = "https://reqres.in/api";
   const newUrl = base_url.replace(/\/+$/, "") + "/" + url.replace(/^\/+/, "");
   return _.proceed(Request.make(newUrl, request.init));
 });
@@ -110,7 +114,7 @@ describe("Interceptors", () => {
     const interceptors = pipe(
       Interceptor.empty(),
       Interceptor.add(base_url_interceptor),
-      Interceptor.add(evil_interceptor),
+      Interceptor.add(evil_interceptor)
     );
 
     const adapter = Fetch.effect(
@@ -125,5 +129,43 @@ describe("Interceptors", () => {
     );
 
     expect(result.data.id).not.toBe(2);
+  });
+
+  describe("Base URL", () => {
+    test("should attach url to every outgoing request", async () => {
+      const interceptors = Interceptor.of(BaseUrl.Url(base_url));
+
+      const adapter = Fetch.effect(
+        Interceptor.makeAdapter(Adapter.fetch, interceptors)
+      );
+
+      const result = await pipe(
+        Fetch.fetch("/users/2"),
+        Effect.flatMap(Response.json),
+        Effect.provide(adapter),
+        Effect.runPromise
+      );
+
+      expect(result.data.id).toBe(2);
+    });
+
+    test("async: should attach url to every outgoing request", async () => {
+      const adapter = Fetch.effect(
+        Effect.gen(function* (_) {
+          const baseUrl = yield* _(Effect.succeed(base_url));
+          const interceptors = Interceptor.of(BaseUrl.Url(baseUrl));
+          return yield* _(Interceptor.makeAdapter(Adapter.fetch, interceptors));
+        })
+      );
+
+      const result = await pipe(
+        Fetch.fetch("/users/2"),
+        Effect.flatMap(Response.json),
+        Effect.provide(adapter),
+        Effect.runPromise
+      );
+
+      expect(result.data.id).toBe(2);
+    });
   });
 });
