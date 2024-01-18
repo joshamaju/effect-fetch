@@ -1,5 +1,12 @@
 # effect-fetch
 
+## 1.3.0
+
+### Minor Changes
+
+- 35673ad: Client with default http methods
+- 275041a: Base URL interceptor that attaches a base URL to every request
+
 ## 1.2.7
 
 ### Patch Changes
