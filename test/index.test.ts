@@ -4,16 +4,17 @@ import * as Effect from "effect/Effect";
 import * as Either from "effect/Either";
 import { pipe } from "effect/Function";
 import * as Stream from "effect/Stream";
-import * as Duration from "effect/Duration";
 
+import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Fetch from "../src/Fetch.js";
+import * as Interceptor from "../src/Interceptor.js";
 import * as Request from "../src/Request.js";
 import * as Response from "../src/Response.js";
-import * as Adapter from "../src/Adapters/Fetch.js";
-import * as Interceptor from "../src/Interceptor.js";
 import { DecodeError } from "../src/internal/error.js";
 
 import * as BaseUrl from "../src/Interceptors/Url.js";
+
+import * as Client from "../src/Client.js";
 
 const adapter = Fetch.make(Adapter.fetch);
 
@@ -50,9 +51,9 @@ test("streaming", async () => {
       _.body == null
         ? Stream.fail(new DecodeError("Cannot create stream from empty body"))
         : Stream.fromReadableStream(
-            () => _.body!,
-            (r) => new DecodeError(r)
-          )
+          () => _.body!,
+          (r) => new DecodeError(r)
+        )
     ),
     Stream.unwrap,
     Stream.runFold("", (a, b) => a + new TextDecoder().decode(b)),
@@ -167,5 +168,47 @@ describe("Interceptors", () => {
 
       expect(result.data.id).toBe(2);
     });
+  });
+});
+
+describe("Client", () => {
+  test("should construct client", async () => {
+    const program = Effect.gen(function* (_) {
+      const client = yield* _(Client.Client);
+      return yield* _(client.get("/users/2"), Effect.flatMap(Response.json));
+    });
+
+    const interceptors = Interceptor.of(base_url_interceptor);
+
+    const adapter = Fetch.effect(
+      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+    );
+
+    const result = await pipe(
+      program,
+      Effect.provide(Client.layer),
+      Effect.provide(adapter),
+      Effect.runPromise
+    );
+
+    expect(result.data.id).toBe(2);
+  });
+
+  test("should provide client", async () => {
+    const interceptors = Interceptor.of(base_url_interceptor);
+
+    const adapter = Fetch.effect(
+      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+    );
+
+    const result = await pipe(
+      Client.get("/users/2"),
+      Effect.flatMap(Response.json),
+      Effect.provide(Client.layer),
+      Effect.provide(adapter),
+      Effect.runPromise
+    );
+
+    expect(result.data.id).toBe(2);
   });
 });
