@@ -11,24 +11,25 @@ import { HttpError } from "./internal/error.js";
 import { HttpRequest } from "./internal/request.js";
 
 import * as internal from "./internal/client.js";
+import { StatusError } from "./Error.js";
 
-type Handler = (
+export type Handler = (
   url: string | URL | HttpRequest,
   init?: RequestInit | undefined
-) => Effect<Fetch, HttpError, Response>;
+) => Effect<Fetch, HttpError | StatusError, Response>;
 
 /**
  * @since 1.3.0
  * @category model
  */
 export interface Client {
-  put: Fetch;
-  get: Fetch;
-  head: Fetch;
-  post: Fetch;
-  patch: Fetch;
-  delete: Fetch;
-  options: Fetch;
+  put: Handler;
+  get: Handler;
+  head: Handler;
+  post: Handler;
+  patch: Handler;
+  delete: Handler;
+  options: Handler;
 }
 
 /**
