@@ -51,9 +51,9 @@ test("streaming", async () => {
       _.body == null
         ? Stream.fail(new DecodeError("Cannot create stream from empty body"))
         : Stream.fromReadableStream(
-          () => _.body!,
-          (r) => new DecodeError(r)
-        )
+            () => _.body!,
+            (r) => new DecodeError(r)
+          )
     ),
     Stream.unwrap,
     Stream.runFold("", (a, b) => a + new TextDecoder().decode(b)),
@@ -130,6 +130,31 @@ describe("Interceptors", () => {
     );
 
     expect(result.data.id).not.toBe(2);
+  });
+
+  test("should copy interceptors", async () => {
+    const explode = Effect.fail({ explosive: "boom" });
+
+    const interceptors = Interceptor.add(
+      Interceptor.empty(),
+      base_url_interceptor
+    );
+
+    const clone = pipe(
+      Interceptor.copy(interceptors),
+      Interceptor.add(explode)
+    );
+
+    const adapter = Fetch.effect(Interceptor.makeAdapter(Adapter.fetch, clone));
+
+    const result = await pipe(
+      Fetch.fetch("/users/2"),
+      Effect.provide(adapter),
+      Effect.either,
+      Effect.runPromise
+    );
+
+    expect(result).toEqual(Either.left({ explosive: "boom" }));
   });
 
   describe("Base URL", () => {
