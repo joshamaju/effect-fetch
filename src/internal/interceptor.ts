@@ -74,3 +74,7 @@ export const makeAdapter = dual<
 >(2, (fetch, interceptors) => {
   return intercept(interceptors).pipe(Effect.provideService(Fetch, fetch));
 });
+
+export const copy = <R, E>(interceptors: Interceptors<R, E>) => {
+  return Chunk.unsafeFromArray([...Chunk.toArray(interceptors)])
+}

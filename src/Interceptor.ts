@@ -75,6 +75,12 @@ export const add: {
 } = Chunk.append;
 
 /**
+ * @since 1.4.0
+ * @category constructor
+ */
+export const copy: <R, E>(interceptors: Interceptors<R, E>) => Interceptors<R, E> = internal.copy;
+
+/**
  * Creates the intercepting wrapper around the provided platform adapter
  *
  * @since 1.0.0
