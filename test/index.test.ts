@@ -51,9 +51,9 @@ test("streaming", async () => {
       _.body == null
         ? Stream.fail(new DecodeError("Cannot create stream from empty body"))
         : Stream.fromReadableStream(
-          () => _.body!,
-          (r) => new DecodeError(r)
-        )
+            () => _.body!,
+            (r) => new DecodeError(r)
+          )
     ),
     Stream.unwrap,
     Stream.runFold("", (a, b) => a + new TextDecoder().decode(b)),
