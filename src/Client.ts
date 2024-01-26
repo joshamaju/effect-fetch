@@ -14,6 +14,7 @@ import { Interceptors, Context } from "./Interceptor.js";
 import * as internal from "./internal/client.js";
 import { StatusError } from "./Error.js";
 
+/** @internal */
 export type Handler = (
   url: string | URL | HttpRequest,
   init?: RequestInit | undefined
