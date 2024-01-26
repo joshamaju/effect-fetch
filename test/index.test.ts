@@ -27,6 +27,10 @@ const base_url_interceptor = Effect.flatMap(Interceptor.Context, (_) => {
   return _.proceed(Request.make(newUrl, request.init));
 });
 
+const pass_through = Effect.flatMap(Interceptor.Context, (_) =>
+  _.proceed(_.request)
+);
+
 class Err {
   readonly _tag = "Err";
 }
@@ -51,9 +55,9 @@ test("streaming", async () => {
       _.body == null
         ? Stream.fail(new DecodeError("Cannot create stream from empty body"))
         : Stream.fromReadableStream(
-          () => _.body!,
-          (r) => new DecodeError(r)
-        )
+            () => _.body!,
+            (r) => new DecodeError(r)
+          )
     ),
     Stream.unwrap,
     Stream.runFold("", (a, b) => a + new TextDecoder().decode(b)),
@@ -235,5 +239,57 @@ describe("Client", () => {
     );
 
     expect(result.data.id).toBe(2);
+  });
+
+  describe("Client - factory", () => {
+    test("should construct client", async () => {
+      const interceptors = Interceptor.empty().pipe(
+        Interceptor.add(base_url_interceptor),
+        Interceptor.add(pass_through)
+      );
+
+      const client = Client.create({ interceptors, adapter: Adapter.fetch });
+
+      const result = await pipe(
+        Client.get("/users/2"),
+        Effect.flatMap(Response.json),
+        Effect.provide(client),
+        Effect.runPromise
+      );
+
+      expect(result.data.id).toBe(2);
+    });
+
+    test("should construct client with base URL", async () => {
+      const interceptors = Interceptor.of(pass_through);
+
+      const client = Client.create({
+        interceptors,
+        url: base_url,
+        adapter: Adapter.fetch,
+      });
+
+      const result = await pipe(
+        Client.get("/users/2"),
+        Effect.flatMap(Response.json),
+        Effect.provide(client),
+        Effect.runPromise
+      );
+
+      expect(result.data.id).toBe(2);
+    });
+
+    test("should construct client without interceptors", async () => {
+      const client = Client.create({ url: base_url, adapter: Adapter.fetch });
+
+      const result = await pipe(
+        Client.get("/users/2"),
+        Effect.flatMap(Response.json),
+        Effect.provide(client),
+        Effect.runPromise
+      );
+
+      expect(result.data.id).toBe(2);
+    });
   });
 });

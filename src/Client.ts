@@ -2,13 +2,14 @@
  * @since 1.3.0
  */
 import { Tag } from "effect/Context";
-import * as Layer from 'effect/Layer'
+import * as Layer from "effect/Layer";
 import type { Effect } from "effect/Effect";
 import { serviceFunctions } from "effect/Effect";
 
 import { Fetch } from "./Fetch.js";
 import { HttpError } from "./internal/error.js";
 import { HttpRequest } from "./internal/request.js";
+import { Interceptors, Context } from "./Interceptor.js";
 
 import * as internal from "./internal/client.js";
 import { StatusError } from "./Error.js";
@@ -48,7 +49,20 @@ export const make: Effect<Fetch, never, Client> = internal.make;
  * @since 1.3.0
  * @category constructor
  */
-export const layer: Layer.Layer<Fetch, never, Client> = Layer.effect(Client, make)
+export const layer: Layer.Layer<Fetch, never, Client> = Layer.effect(
+  Client,
+  make
+);
+
+/**
+ * @since 1.4.0
+ * @category constructor
+ */
+export const create: <R = never, E = never>(config: {
+  url?: string;
+  adapter: Fetch;
+  interceptors?: Interceptors<R, E>;
+}) => Layer.Layer<Exclude<R, Context>, E | HttpError, Fetch> = internal.create;
 
 const functions = serviceFunctions(make);
 
