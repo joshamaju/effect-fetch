@@ -1,5 +1,17 @@
 # effect-fetch
 
+## 1.4.0
+
+### Minor Changes
+
+- f08a8eb: Provide constructor to clone/copy existing interceptors
+- a86b2ab: Add client constructor factory function
+- a70e096: Client with default http methods
+
+### Patch Changes
+
+- a31a0d4: Add default response status OK filter
+
 ## 1.3.0
 
 ### Minor Changes
