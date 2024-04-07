@@ -1,1 +1,3 @@
 # effect-fetch
+
+### [examples](/example)
