@@ -1,27 +1,22 @@
-import * as Effect from "effect/Effect";
 import * as Chunk from "effect/Chunk";
+import * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
 
-import { Url } from "../Interceptors/Url.js";
-import { Client, Handler } from "../Client.js";
+import { Config, Client, Handler } from "../Client.js";
 import * as Fetch from "../Fetch.js";
-import {
-  Interceptors,
-  copy,
-  empty,
-  makeAdapter,
-  Merge,
-} from "../Interceptor.js";
-
+import { copy, empty, makeAdapter, Merge } from "../Interceptor.js";
+import { Url } from "../Interceptors/Url.js";
 import { filterStatusOk } from "./response/index.js";
 
 type Method = NonNullable<RequestInit["method"]>;
 
-export const make = Effect.gen(function* (_) {
-  const fetch = yield* _(Fetch.Fetch);
+export const make = Effect.gen(function* () {
+  const fetch = yield* Fetch.Fetch;
 
   const withMethod = (method: Method): Handler => {
-    return (url, init) =>
-      fetch(url, { ...init, method }).pipe(Effect.flatMap(filterStatusOk));
+    return (url, init) => {
+      return Effect.flatMap(fetch(url, { ...init, method }), filterStatusOk);
+    };
   };
 
   const get = withMethod("GET");
@@ -41,25 +36,23 @@ export const make = Effect.gen(function* (_) {
   return Client.of({ get, put, post, head, patch, options, delete: delete_ });
 });
 
-export const create = <R, E>({
+export const create = <E, R>({
   url,
   adapter,
   interceptors = empty(),
-}: {
-  url?: string;
-  adapter: Fetch.Fetch;
-  interceptors?: Interceptors<R, E>;
-}) => {
+}: Config<E, R>) => {
   const clone = copy(interceptors);
   const interceptor = url ? Url(url) : null;
 
   type Interceptors = Merge<typeof clone, NonNullable<typeof interceptor>>;
 
   const newInterceptors: Interceptors = interceptor
-    ? clone.pipe(Chunk.prepend(interceptor))
+    ? Chunk.prepend(clone, interceptor)
     : clone;
 
   return Chunk.isEmpty(newInterceptors)
     ? Fetch.make(adapter)
     : Fetch.effect(makeAdapter(adapter, newInterceptors));
 };
+
+export const layer = Layer.effect(Client, make);

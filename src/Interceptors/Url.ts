@@ -3,16 +3,17 @@
  */
 
 import * as Effect from "effect/Effect";
-import * as Request from '../Request.js'
-import * as Interceptor from "../Interceptor.js";
+
+import * as Request from "../Request.js";
+import {Context} from "../Interceptor.js";
 
 /**
-   * @since 1.3.0
-   * @category interceptor
-   */
+ * @since 1.3.0
+ * @category interceptor
+ */
 export const Url = (base: string) => {
-  return Effect.gen(function* (_) {
-    const context = yield* _(Interceptor.Context);
+  return Effect.gen(function* () {
+    const context = yield* Context;
 
     const req = context.request;
     const url = req.url.toString();
@@ -21,6 +22,6 @@ export const Url = (base: string) => {
       ? base.replace(/\/+$/, "") + "/" + url.replace(/^\/+/, "")
       : base;
 
-    return yield* _(context.proceed(Request.make(url_, req.init)));
+    return yield* context.proceed(Request.make(url_, req.init));
   });
 };

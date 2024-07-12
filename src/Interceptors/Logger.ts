@@ -83,18 +83,15 @@ function logHeader(headers: Headers, headersToRedact: string[]) {
 }
 
 const logger = (level: Level, headersToRedact: string[] = []) => {
-  return Effect.gen(function* (_) {
-    const context = yield* _(Interceptor.Context);
+  return Effect.gen(function* () {
+    const context = yield* Interceptor.Context;
     const request = context.request;
 
     if (level == Level.NONE) {
-      return yield* _(context.proceed(request));
+      return yield* context.proceed(request);
     }
 
     const req = request.clone();
-
-    type n = BodyInit;
-    type m = XMLHttpRequestBodyInit;
 
     const logBody = level == Level.BODY;
     const logHeaders = logBody || level == Level.HEADERS;
@@ -106,29 +103,26 @@ const logger = (level: Level, headersToRedact: string[] = []) => {
       // incase we get an invalid url while running in node
       const mock = new Request("www.google.com", req.init);
 
-      const content = yield* _(
-        Effect.tryPromise(() => mock.text()),
-        Effect.exit
-      );
+      const content = yield* Effect.exit(Effect.tryPromise(() => mock.text()));
 
       if (Exit.isSuccess(content)) {
         msg += ` (${content.value.length}-byte body)`;
       }
     }
 
-    yield* _(Effect.log(msg));
+    yield* Effect.log(msg);
 
     if (logHeaders && req.init?.headers) {
-      yield* _(logHeader(new Headers(req.init.headers), headersToRedact));
+      yield* logHeader(new Headers(req.init.headers), headersToRedact);
     }
 
-    yield* _(Effect.log(`--> END ${method}`));
+    yield* Effect.log(`--> END ${method}`);
 
     let startNs = Date.now();
-    let result = yield* _(context.proceed(req), Effect.exit);
+    let result = yield* Effect.exit(context.proceed(req));
 
     if (Exit.isFailure(result)) {
-      yield* _(Effect.log(`<-- HTTP FAILED: ${Cause.pretty(result.cause)}`));
+      yield* Effect.log(`<-- HTTP FAILED: ${Cause.pretty(result.cause)}`);
       throw result.cause;
     }
 
@@ -136,16 +130,16 @@ const logger = (level: Level, headersToRedact: string[] = []) => {
     const response = result.value;
     const res = response.clone();
 
-    yield* _(
-      Effect.log(`<-- ${res.status} ${res.statusText} ${res.url} (${tookMs}ms)`)
+    yield* Effect.log(
+      `<-- ${res.status} ${res.statusText} ${res.url} (${tookMs}ms)`
     );
 
     if (logHeaders) {
-      yield* _(logHeader(res.headers, headersToRedact));
+      yield* logHeader(res.headers, headersToRedact);
     }
 
     if (!logBody) {
-      yield* _(Effect.log("<-- END HTTP"));
+      yield* Effect.log("<-- END HTTP");
     }
 
     return response;

@@ -51,21 +51,21 @@ export {
  * @since 1.0.0
  * @category combinators
  */
-export const json: (value: Response) => Effect<never, DecodeError, any> =
+export const json: (value: Response) => Effect<any, DecodeError, never> =
   internal.json;
 
 /**
  * @since 1.0.0
  * @category combinators
  */
-export const text: (value: Response) => Effect<never, DecodeError, string> =
+export const text: (value: Response) => Effect<string, DecodeError, never> =
   internal.text;
 
 /**
  * @since 1.0.0
  * @category combinators
  */
-export const blob: (value: Response) => Effect<never, DecodeError, Blob> =
+export const blob: (value: Response) => Effect<Blob, DecodeError, never> =
   internal.blob;
 
 /**
@@ -74,7 +74,7 @@ export const blob: (value: Response) => Effect<never, DecodeError, Blob> =
  */
 export const formData: (
   value: Response
-) => Effect<never, DecodeError, FormData> = internal.formData;
+) => Effect<FormData, DecodeError, never> = internal.formData;
 
 /**
  * @since 1.0.0
@@ -82,7 +82,7 @@ export const formData: (
  */
 export const arrayBuffer: (
   value: Response
-) => Effect<never, DecodeError, ArrayBuffer> = internal.arrayBuffer;
+) => Effect<ArrayBuffer, DecodeError, never> = internal.arrayBuffer;
 
 /**
  * @since 1.0.0
@@ -90,7 +90,7 @@ export const arrayBuffer: (
  */
 export const filterStatusOk: (
   response: Response
-) => Effect<never, StatusError, Response> = internal.filterStatusOk;
+) => Effect<Response, StatusError, never> = internal.filterStatusOk;
 
 /**
  * @since 1.0.0
@@ -98,7 +98,7 @@ export const filterStatusOk: (
  */
 export const filterStatusOkT: (
   response: Response
-) => Effect<never, StatusErrorT<NotOkStatusCode>, ResponseT<OkStatusCode>> =
+) => Effect<ResponseT<OkStatusCode>, StatusErrorT<NotOkStatusCode>, never> =
   internal.filterStatusOkT;
 
 /**
@@ -108,9 +108,9 @@ export const filterStatusOkT: (
 export const filterStatus = dual<
   (
     fn: Predicate<number>
-  ) => (response: Response) => Effect<never, StatusError, Response>,
+  ) => (response: Response) => Effect<Response, StatusError, never>,
   (
     response: Response,
     fn: Predicate<number>
-  ) => Effect<never, StatusError, Response>
+  ) => Effect<Response, StatusError, never>
 >(2, (r, f) => internal.filterStatus(r, f));

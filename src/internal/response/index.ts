@@ -29,8 +29,8 @@ export const arrayBuffer = decode((response: Response) =>
 
 export const filterStatusOk = (response: Response) => {
   return Effect.if(response.ok, {
-    onTrue: Effect.succeed(response),
-    onFalse: Effect.fail(new StatusError(response)),
+    onTrue: () => Effect.succeed(response),
+    onFalse: () => Effect.fail(new StatusError(response)),
   });
 };
 
@@ -48,8 +48,8 @@ export const filterStatusOkT = flow(
 
 export const filterStatus = (response: Response, fn: Predicate<number>) => {
   return Effect.if(fn(response.status), {
-    onTrue: Effect.succeed(response),
-    onFalse: Effect.fail(new StatusError(response))
+    onTrue: () => Effect.succeed(response),
+    onFalse: () => Effect.fail(new StatusError(response))
   })
 };
 
@@ -92,30 +92,30 @@ export class HttpResponse {
     return this.response.bodyUsed;
   }
 
-  clone(): Effect.Effect<never, Error, Response> {
+  clone(): Effect.Effect<Response, Error, never> {
     return Effect.try({
       try: () => this.response.clone(),
       catch: (error) => error as Error,
     });
   }
 
-  arrayBuffer(): Effect.Effect<never, DecodeError, ArrayBuffer> {
+  arrayBuffer(): Effect.Effect<ArrayBuffer, DecodeError, never> {
     return arrayBuffer(this.response);
   }
 
-  blob(): Effect.Effect<never, DecodeError, Blob> {
+  blob(): Effect.Effect<Blob, DecodeError, never> {
     return blob(this.response);
   }
 
-  formData(): Effect.Effect<never, DecodeError, FormData> {
+  formData(): Effect.Effect<FormData, DecodeError, never> {
     return formData(this.response);
   }
 
-  json(): Effect.Effect<never, DecodeError, any> {
+  json(): Effect.Effect<any, DecodeError, never> {
     return json(this.response);
   }
 
-  text(): Effect.Effect<never, DecodeError, string> {
+  text(): Effect.Effect<string, DecodeError, never> {
     return text(this.response);
   }
 }

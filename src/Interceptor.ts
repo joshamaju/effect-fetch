@@ -4,7 +4,7 @@
 import type { Effect } from "effect/Effect";
 import * as Chunk from "effect/Chunk";
 
-import { Fetch } from "./Fetch.js";
+import { Adapter, Fetch } from "./Fetch.js";
 import { Tag } from "effect/Context";
 import * as internal from "./internal/interceptor.js";
 import { HttpRequest } from "./internal/request.js";
@@ -24,34 +24,34 @@ export type Merge<
  * @since 1.0.0
  * @category model
  */
-export interface Context {
+export interface Chain {
   request: HttpRequest;
-  proceed(request: HttpRequest): Effect<never, HttpError, Response>;
+  proceed(request: HttpRequest): Effect<Response, HttpError, never>;
 }
 
 /**
  * @since 1.2.3
  * @category model
  */
-export interface Interceptor<R, E> extends Effect<R | Context, E, Response> {}
+export interface Interceptor<E, R> extends Effect<Response, E, R | Context> {}
 
 /**
  * @since 1.2.3
  * @category model
  */
-export type Interceptors<R, E> = Chunk.Chunk<Interceptor<R, E>>;
+export type Interceptors<E, R> = Chunk.Chunk<Interceptor<E, R>>;
 
 /**
  * @since 1.0.0
  * @category tag
  */
-export const Context = Tag<Context>();
+export class Context extends Tag('effect-fetch/Interceptor')<Context, Chain>() {}
 
 /**
  * @since 1.2.0
  * @category constructors
  */
-export const of: <R, E>(interceptor: Interceptor<R, E>) => Interceptors<R, E> =
+export const of: <E, R>(interceptor: Interceptor<E, R>) => Interceptors<E, R> =
   Chunk.of;
 
 /**
@@ -67,18 +67,18 @@ export const empty: () => Interceptors<never, never> = Chunk.empty;
 export const add: {
   <T extends Interceptor<any, any>>(
     interceptor: T
-  ): <R, E>(interceptors: Interceptors<R, E>) => Merge<Interceptors<R, E>, T>;
-  <R, E, T extends Interceptor<any, any>>(
-    interceptors: Interceptors<R, E>,
+  ): <E, R>(interceptors: Interceptors<E, R>) => Merge<Interceptors<E, R>, T>;
+  <T extends Interceptor<any, any>, E, R>(
+    interceptors: Interceptors<E, R>,
     interceptor: T
-  ): Merge<Interceptors<R, E>, T>;
+  ): Merge<Interceptors<E, R>, T>;
 } = Chunk.append;
 
 /**
  * @since 1.4.0
  * @category constructor
  */
-export const copy: <R, E>(interceptors: Interceptors<R, E>) => Interceptors<R, E> = internal.copy;
+export const copy: <E, R>(interceptors: Interceptors<E, R>) => Interceptors<E, R> = internal.copy;
 
 /**
  * Creates the intercepting wrapper around the provided platform adapter
@@ -86,9 +86,9 @@ export const copy: <R, E>(interceptors: Interceptors<R, E>) => Interceptors<R, E
  * @since 1.0.0
  * @category constructors
  */
-export const makeFetch: <R, E>(
-  interceptors: Interceptors<R, E>
-) => Effect<Exclude<R, Context> | Fetch, E, Fetch> = internal.intercept;
+export const makeFetch: <E, R>(
+  interceptors: Interceptors<E, R>
+) => Effect<Adapter, E, Exclude<R, Context> | Fetch> = internal.intercept;
 
 /**
  * Provides the given platform adapter to the interceptor `Fetch` wrapper
@@ -97,11 +97,11 @@ export const makeFetch: <R, E>(
  * @category constructors
  */
 export const makeAdapter: {
+  <E, R>(
+    interceptors: Interceptors<E, R>
+  ): (fetch: Adapter) => Effect<Adapter, E, Exclude<R, Context>>;
   <R, E>(
-    interceptors: Interceptors<R, E>
-  ): (fetch: Fetch) => Effect<Exclude<R, Context>, E, Fetch>;
-  <R, E>(
-    fetch: Fetch,
-    interceptors: Interceptors<R, E>
-  ): Effect<Exclude<R, Context>, E, Fetch>;
+    fetch: Adapter,
+    interceptors: Interceptors<E, R>
+  ): Effect<Adapter, E, Exclude<R, Context>>;
 } = internal.makeAdapter;

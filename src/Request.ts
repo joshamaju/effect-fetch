@@ -32,21 +32,21 @@ export const appendBody: (body: Body) => (request: HttpRequest) => Request = int
  * @since 1.0.0
  * @category combinators
  */
-export const json: (value: Request) => Effect<never, DecodeError, any> =
+export const json: (value: Request) => Effect<any, DecodeError, never> =
   internal.json;
 
 /**
  * @since 1.0.0
  * @category combinators
  */
-export const text: (value: Request) => Effect<never, DecodeError, string> =
+export const text: (value: Request) => Effect<string, DecodeError, never> =
   internal.text;
 
 /**
  * @since 1.0.0
  * @category combinators
  */
-export const blob: (value: Request) => Effect<never, DecodeError, Blob> =
+export const blob: (value: Request) => Effect<Blob, DecodeError, never> =
   internal.blob;
 
 /**
@@ -55,7 +55,7 @@ export const blob: (value: Request) => Effect<never, DecodeError, Blob> =
  */
 export const formData: (
   value: Request
-) => Effect<never, DecodeError, FormData> = internal.formData;
+) => Effect<FormData, DecodeError, never> = internal.formData;
 
 /**
  * @since 1.0.0
@@ -63,4 +63,4 @@ export const formData: (
  */
 export const arrayBuffer: (
   value: Request
-) => Effect<never, DecodeError, ArrayBuffer> = internal.arrayBuffer;
+) => Effect<ArrayBuffer, DecodeError, never> = internal.arrayBuffer;

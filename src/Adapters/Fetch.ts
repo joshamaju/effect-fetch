@@ -3,11 +3,11 @@
  */
 
 import * as Effect from "effect/Effect";
-import { Fetch } from "../Fetch.js";
+import { Adapter } from "../Fetch.js";
 import { HttpError } from "../internal/error.js";
 import { HttpRequest } from "../internal/request.js";
 
-const fetch_: Fetch = (url, init) => {
+const fetch_: Adapter = (url, init) => {
   return Effect.tryPromise({
     try: () =>
       url instanceof HttpRequest ? fetch(url.request) : fetch(url, init),

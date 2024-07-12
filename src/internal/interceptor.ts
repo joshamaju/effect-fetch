@@ -4,20 +4,20 @@ import * as Effect from "effect/Effect";
 import { dual } from "effect/Function";
 import * as Option from "effect/Option";
 
-import { Fetch } from "../Fetch.js";
+import { Adapter, Fetch } from "../Fetch.js";
 import { Context, Interceptors } from "../Interceptor.js";
 import { HttpError } from "./error.js";
 import { HttpRequest } from "./request.js";
 
-export function compose(initiator: Effect.Effect<Context, any, Response>) {
-  return <R, E>(interceptors: Interceptors<R, E>) =>
+export function compose(initiator: Effect.Effect<Response, any, Context>) {
+  return <E, R>(interceptors: Interceptors<E, R>) =>
     (request: HttpRequest) => {
       let index = -1;
 
       function dispatch(
         i: number,
         request: HttpRequest
-      ): Effect.Effect<never, HttpError, Response> {
+      ): Effect.Effect<Response, HttpError, never> {
         if (i <= index) {
           return Effect.die(
             new Cause.RuntimeException("proceed() called multiple times")
@@ -45,15 +45,15 @@ export function compose(initiator: Effect.Effect<Context, any, Response>) {
     };
 }
 
-export const intercept = <R, E>(interceptors: Interceptors<R, E>) => {
-  return Effect.gen(function* (_) {
-    const fetch = yield* _(Fetch);
+export const intercept = <E, R>(interceptors: Interceptors<E, R>) => {
+  return Effect.gen(function* () {
+    const fetch = yield* Fetch;
 
     const handler = compose(
-      Effect.gen(function* (_) {
-        const { request } = yield* _(Context);
+      Effect.gen(function* () {
+        const { request } = yield* Context;
         const { url, init } = request;
-        return yield* _(fetch(url, init));
+        return yield* fetch(url, init);
       })
     );
 
@@ -64,17 +64,17 @@ export const intercept = <R, E>(interceptors: Interceptors<R, E>) => {
 };
 
 export const makeAdapter = dual<
-  <R, E>(
-    interceptors: Interceptors<R, E>
-  ) => (fetch: Fetch) => Effect.Effect<Exclude<R, Context>, E, Fetch>,
-  <R, E>(
-    fetch: Fetch,
-    interceptors: Interceptors<R, E>
-  ) => Effect.Effect<Exclude<R, Context>, E, Fetch>
+  <E, R>(
+    interceptors: Interceptors<E, R>
+  ) => (fetch: Adapter) => Effect.Effect<Adapter, E, Exclude<R, Context>>,
+  <E, R>(
+    fetch: Adapter,
+    interceptors: Interceptors<E, R>
+  ) => Effect.Effect<Adapter, E, Exclude<R, Context>>
 >(2, (fetch, interceptors) => {
   return intercept(interceptors).pipe(Effect.provideService(Fetch, fetch));
 });
 
-export const copy = <R, E>(interceptors: Interceptors<R, E>) => {
-  return Chunk.unsafeFromArray([...Chunk.toArray(interceptors)])
-}
+export const copy = <E, R>(interceptors: Interceptors<E, R>) => {
+  return Chunk.unsafeFromArray([...Chunk.toArray(interceptors)]);
+};

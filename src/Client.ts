@@ -2,29 +2,35 @@
  * @since 1.3.0
  */
 import { Tag } from "effect/Context";
-import * as Layer from "effect/Layer";
+import type { Layer } from "effect/Layer";
 import type { Effect } from "effect/Effect";
 import { serviceFunctions } from "effect/Effect";
 
-import { Fetch } from "./Fetch.js";
+import { Adapter, Fetch } from "./Fetch.js";
+import { Context, Interceptors } from "./Interceptor.js";
 import { HttpError } from "./internal/error.js";
 import { HttpRequest } from "./internal/request.js";
-import { Interceptors, Context } from "./Interceptor.js";
-
-import * as internal from "./internal/client.js";
 import { StatusError } from "./Error.js";
+import * as internal from "./internal/client.js";
+
+/** @internal */
+export type Config<E, R> = {
+  url?: string;
+  adapter: Adapter;
+  interceptors?: Interceptors<E, R>;
+};
 
 /** @internal */
 export type Handler = (
   url: string | URL | HttpRequest,
   init?: RequestInit | undefined
-) => Effect<Fetch, HttpError | StatusError, Response>;
+) => Effect<Response, HttpError | StatusError, never>;
 
 /**
  * @since 1.3.0
  * @category model
  */
-export interface Client {
+export interface Handlers {
   put: Handler;
   get: Handler;
   head: Handler;
@@ -38,32 +44,27 @@ export interface Client {
  * @since 1.3.0
  * @category tag
  */
-export const Client = Tag<Client>("effect-fetch/Client");
+export class Client extends Tag("effect-fetch/Client")<Client, Handlers>() {}
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const make: Effect<Fetch, never, Client> = internal.make;
+export const make: Effect<Handlers, never, Fetch> = internal.make;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const layer: Layer.Layer<Fetch, never, Client> = Layer.effect(
-  Client,
-  make
-);
+export const layer: Layer<Client, never, Fetch> = internal.layer;
 
 /**
  * @since 1.4.0
  * @category constructor
  */
-export const create: <R = never, E = never>(config: {
-  url?: string;
-  adapter: Fetch;
-  interceptors?: Interceptors<R, E>;
-}) => Layer.Layer<Exclude<R, Context>, E | HttpError, Fetch> = internal.create;
+export const create: <E = never, R = never>(
+  config: Config<E, R>
+) => Layer<Fetch, HttpError | E, Exclude<R, Context>> = internal.create;
 
 const functions = serviceFunctions(make);
 
@@ -71,39 +72,39 @@ const functions = serviceFunctions(make);
  * @since 1.3.0
  * @category constructor
  */
-export const put: Handler = functions.put;
+export const put = functions.put;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const get: Handler = functions.get;
+export const get = functions.get;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const head: Handler = functions.head;
+export const head = functions.head;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const post: Handler = functions.post;
+export const post = functions.post;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const patch: Handler = functions.patch;
+export const patch = functions.patch;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const options: Handler = functions.options;
+export const options = functions.options;
 
-const delete_: Handler = functions.delete;
+const delete_ = functions.delete;
 
 export {
   /**
