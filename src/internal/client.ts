@@ -4,7 +4,8 @@ import * as Layer from "effect/Layer";
 
 import { Config, Client, Handler } from "../Client.js";
 import * as Fetch from "../Fetch.js";
-import { copy, empty, makeAdapter, Merge } from "../Interceptor.js";
+import type { Merge } from "../Interceptor.js";
+import { copy, empty, make as makeAdapter } from "../Interceptor.js";
 import { Url } from "../Interceptors/Url.js";
 import { filterStatusOk } from "./response/index.js";
 

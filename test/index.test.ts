@@ -123,7 +123,7 @@ describe("Interceptors", () => {
     );
 
     const adapter = Fetch.effect(
-      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+      Interceptor.make(Adapter.fetch, interceptors)
     );
 
     const result = await pipe(
@@ -149,7 +149,7 @@ describe("Interceptors", () => {
       Interceptor.add(explode)
     );
 
-    const adapter = Fetch.effect(Interceptor.makeAdapter(Adapter.fetch, clone));
+    const adapter = Fetch.effect(Interceptor.make(Adapter.fetch, clone));
 
     const result = await pipe(
       Fetch.fetch("/users/2"),
@@ -166,7 +166,7 @@ describe("Interceptors", () => {
       const interceptors = Interceptor.of(BaseUrl.Url(base_url));
 
       const adapter = Fetch.effect(
-        Interceptor.makeAdapter(Adapter.fetch, interceptors)
+        Interceptor.make(Adapter.fetch, interceptors)
       );
 
       const result = await pipe(
@@ -184,7 +184,7 @@ describe("Interceptors", () => {
         Effect.gen(function* (_) {
           const baseUrl = yield* _(Effect.succeed(base_url));
           const interceptors = Interceptor.of(BaseUrl.Url(baseUrl));
-          return yield* _(Interceptor.makeAdapter(Adapter.fetch, interceptors));
+          return yield* _(Interceptor.make(Adapter.fetch, interceptors));
         })
       );
 
@@ -210,7 +210,7 @@ describe("Client", () => {
     const interceptors = Interceptor.of(base_url_interceptor);
 
     const adapter = Fetch.effect(
-      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+      Interceptor.make(Adapter.fetch, interceptors)
     );
 
     const result = await pipe(
@@ -227,7 +227,7 @@ describe("Client", () => {
     const interceptors = Interceptor.of(base_url_interceptor);
 
     const adapter = Fetch.effect(
-      Interceptor.makeAdapter(Adapter.fetch, interceptors)
+      Interceptor.make(Adapter.fetch, interceptors)
     );
 
     const result = await pipe(

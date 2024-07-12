@@ -13,7 +13,7 @@ import { HttpError } from "./Error.js";
 /** @internal */
 export type Merge<
   I extends Interceptors<any, any>,
-  T extends Interceptor<any, any>,
+  T extends Interceptor<any, any>
 > = I extends Interceptors<infer R1, infer E1>
   ? T extends Interceptor<infer R2, infer E2>
     ? Interceptors<R1 | R2, E1 | E2>
@@ -45,7 +45,10 @@ export type Interceptors<E, R> = Chunk.Chunk<Interceptor<E, R>>;
  * @since 1.0.0
  * @category tag
  */
-export class Context extends Tag('effect-fetch/Interceptor')<Context, Chain>() {}
+export class Context extends Tag("effect-fetch/Interceptor")<
+  Context,
+  Chain
+>() {}
 
 /**
  * @since 1.2.0
@@ -65,9 +68,9 @@ export const empty: () => Interceptors<never, never> = Chunk.empty;
  * @category combinators
  */
 export const add: {
-  <T extends Interceptor<any, any>>(
-    interceptor: T
-  ): <E, R>(interceptors: Interceptors<E, R>) => Merge<Interceptors<E, R>, T>;
+  <T extends Interceptor<any, any>>(interceptor: T): <E, R>(
+    interceptors: Interceptors<E, R>
+  ) => Merge<Interceptors<E, R>, T>;
   <T extends Interceptor<any, any>, E, R>(
     interceptors: Interceptors<E, R>,
     interceptor: T
@@ -78,7 +81,9 @@ export const add: {
  * @since 1.4.0
  * @category constructor
  */
-export const copy: <E, R>(interceptors: Interceptors<E, R>) => Interceptors<E, R> = internal.copy;
+export const copy: <E, R>(
+  interceptors: Interceptors<E, R>
+) => Interceptors<E, R> = internal.copy;
 
 /**
  * Creates the intercepting wrapper around the provided platform adapter
@@ -96,12 +101,13 @@ export const makeFetch: <E, R>(
  * @since 1.0.0
  * @category constructors
  */
-export const makeAdapter: {
-  <E, R>(
-    interceptors: Interceptors<E, R>
-  ): (fetch: Adapter) => Effect<Adapter, E, Exclude<R, Context>>;
-  <R, E>(
-    fetch: Adapter,
-    interceptors: Interceptors<E, R>
-  ): Effect<Adapter, E, Exclude<R, Context>>;
-} = internal.makeAdapter;
+export const make: {
+  <E, R>(interceptors: Interceptors<E, R>): (
+    fetch: Adapter
+  ) => Effect<Adapter, E, Exclude<R, Context>>;
+  <R, E>(fetch: Adapter, interceptors: Interceptors<E, R>): Effect<
+    Adapter,
+    E,
+    Exclude<R, Context>
+  >;
+} = internal.make;

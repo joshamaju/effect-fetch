@@ -66,45 +66,45 @@ export const create: <E = never, R = never>(
   config: Config<E, R>
 ) => Layer<Fetch, HttpError | E, Exclude<R, Context>> = internal.create;
 
-const functions = serviceFunctions(make);
+const handlers = serviceFunctions(make);
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const put = functions.put;
+export const put = handlers.put;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const get = functions.get;
+export const get = handlers.get;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const head = functions.head;
+export const head = handlers.head;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const post = functions.post;
+export const post = handlers.post;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const patch = functions.patch;
+export const patch = handlers.patch;
 
 /**
  * @since 1.3.0
  * @category constructor
  */
-export const options = functions.options;
+export const options = handlers.options;
 
-const delete_ = functions.delete;
+const delete_ = handlers.delete;
 
 export {
   /**

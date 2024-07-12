@@ -63,7 +63,7 @@ export const intercept = <E, R>(interceptors: Interceptors<E, R>) => {
   });
 };
 
-export const makeAdapter = dual<
+export const make = dual<
   <E, R>(
     interceptors: Interceptors<E, R>
   ) => (fetch: Adapter) => Effect.Effect<Adapter, E, Exclude<R, Context>>,
