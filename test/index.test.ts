@@ -185,10 +185,11 @@ describe("Interceptors", () => {
 
     test("async: should attach url to every outgoing request", async () => {
       const adapter = Fetch.effect(
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           const interceptors = Interceptor.of(BaseUrl.Url(base_url));
-          return yield* _(
-            Interceptor.provide(Interceptor.make(interceptors), Adapter.fetch)
+          return yield* Interceptor.provide(
+            Interceptor.make(interceptors),
+            Adapter.fetch
           );
         })
       );
@@ -226,9 +227,9 @@ describe("Client", () => {
   });
 
   test("should construct client with base URL", async () => {
-    const program = Effect.gen(function* (_) {
-      const client = yield* _(Client.Client);
-      return yield* _(client.get("/users/2"), Effect.flatMap(Response.json));
+    const program = Effect.gen(function* () {
+      const client = yield* Client.Client;
+      return yield* Effect.flatMap(client.get("/users/2"), Response.json);
     });
 
     const client = Client.create({ url: base_url, adapter: Adapter.fetch });
@@ -240,9 +241,9 @@ describe("Client", () => {
   });
 
   test("should construct client with interceptors", async () => {
-    const program = Effect.gen(function* (_) {
-      const client = yield* _(Client.Client);
-      return yield* _(client.get("/users/2"), Effect.flatMap(Response.json));
+    const program = Effect.gen(function* () {
+      const client = yield* Client.Client;
+      return yield* Effect.flatMap(client.get("/users/2"), Response.json);
     });
 
     const interceptors = Interceptor.of(base_url_interceptor);
