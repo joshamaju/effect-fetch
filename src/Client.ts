@@ -64,7 +64,7 @@ export const layer: Layer<Client, never, Fetch> = internal.layer;
  */
 export const create: <E = never, R = never>(
   config: Config<E, R>
-) => Layer<Fetch, HttpError | E, Exclude<R, Context>> = internal.create;
+) => Effect<Handlers, E | HttpError, Exclude<Exclude<R, Context>, Fetch>> = internal.create;
 
 const handlers = serviceFunctions(make);
 

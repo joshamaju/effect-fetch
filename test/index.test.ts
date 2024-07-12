@@ -4,6 +4,7 @@ import * as Effect from "effect/Effect";
 import * as Either from "effect/Either";
 import { pipe } from "effect/Function";
 import * as Stream from "effect/Stream";
+import * as Layer from "effect/Layer";
 
 import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Fetch from "../src/Fetch.js";
@@ -71,7 +72,7 @@ test("streaming", async () => {
 describe("Interceptors", () => {
   test("single", async () => {
     const newAdapter = pipe(
-      Interceptor.makeFetch(Interceptor.of(base_url_interceptor)),
+      Interceptor.make(Interceptor.of(base_url_interceptor)),
       Effect.provide(adapter),
       Fetch.effect
     );
@@ -94,7 +95,7 @@ describe("Interceptors", () => {
     );
 
     const newAdapter = pipe(
-      Interceptor.makeFetch(interceptors),
+      Interceptor.make(interceptors),
       Effect.provide(adapter),
       Fetch.effect
     );
@@ -122,8 +123,10 @@ describe("Interceptors", () => {
       Interceptor.add(evil_interceptor)
     );
 
-    const adapter = Fetch.effect(
-      Interceptor.make(Adapter.fetch, interceptors)
+    const adapter = pipe(
+      Interceptor.make(interceptors),
+      Interceptor.provide(Adapter.fetch),
+      Fetch.effect
     );
 
     const result = await pipe(
@@ -146,10 +149,11 @@ describe("Interceptors", () => {
 
     const clone = pipe(
       Interceptor.copy(interceptors),
-      Interceptor.add(explode)
+      Interceptor.add(explode),
+      Interceptor.make
     );
 
-    const adapter = Fetch.effect(Interceptor.make(Adapter.fetch, clone));
+    const adapter = Fetch.effect(Interceptor.provide(clone, Adapter.fetch));
 
     const result = await pipe(
       Fetch.fetch("/users/2"),
@@ -165,14 +169,14 @@ describe("Interceptors", () => {
     test("should attach url to every outgoing request", async () => {
       const interceptors = Interceptor.of(BaseUrl.Url(base_url));
 
-      const adapter = Fetch.effect(
-        Interceptor.make(Adapter.fetch, interceptors)
+      const adapter = Interceptor.make(interceptors).pipe(
+        Interceptor.provide(Adapter.fetch)
       );
 
       const result = await pipe(
         Fetch.fetch("/users/2"),
         Effect.flatMap(Response.json),
-        Effect.provide(adapter),
+        Effect.provide(Fetch.effect(adapter)),
         Effect.runPromise
       );
 
@@ -182,9 +186,10 @@ describe("Interceptors", () => {
     test("async: should attach url to every outgoing request", async () => {
       const adapter = Fetch.effect(
         Effect.gen(function* (_) {
-          const baseUrl = yield* _(Effect.succeed(base_url));
-          const interceptors = Interceptor.of(BaseUrl.Url(baseUrl));
-          return yield* _(Interceptor.make(Adapter.fetch, interceptors));
+          const interceptors = Interceptor.of(BaseUrl.Url(base_url));
+          return yield* _(
+            Interceptor.provide(Interceptor.make(interceptors), Adapter.fetch)
+          );
         })
       );
 
@@ -201,95 +206,51 @@ describe("Interceptors", () => {
 });
 
 describe("Client", () => {
-  test("should construct client", async () => {
+  test("can access individual client services", async () => {
+    const interceptors = Interceptor.of(base_url_interceptor);
+
+    const adapter = pipe(
+      Interceptor.make(interceptors),
+      Interceptor.provide(Adapter.fetch),
+      Fetch.effect
+    );
+
+    const result = await pipe(
+      Client.get("/users/2"),
+      Effect.flatMap(Response.json),
+      Effect.provide(adapter),
+      Effect.runPromise
+    );
+
+    expect(result.data.id).toBe(2);
+  });
+
+  test("should construct client with base URL", async () => {
+    const program = Effect.gen(function* (_) {
+      const client = yield* _(Client.Client);
+      return yield* _(client.get("/users/2"), Effect.flatMap(Response.json));
+    });
+
+    const client = Client.create({ url: base_url, adapter: Adapter.fetch });
+    const layer = Layer.effect(Client.Client, client);
+
+    const result = await program.pipe(Effect.provide(layer), Effect.runPromise);
+
+    expect(result.data.id).toBe(2);
+  });
+
+  test("should construct client with interceptors", async () => {
     const program = Effect.gen(function* (_) {
       const client = yield* _(Client.Client);
       return yield* _(client.get("/users/2"), Effect.flatMap(Response.json));
     });
 
     const interceptors = Interceptor.of(base_url_interceptor);
+    const client = Client.create({ interceptors, adapter: Adapter.fetch });
+    const layer = Layer.effect(Client.Client, client);
 
-    const adapter = Fetch.effect(
-      Interceptor.make(Adapter.fetch, interceptors)
-    );
-
-    const result = await pipe(
-      program,
-      Effect.provide(Client.layer),
-      Effect.provide(adapter),
-      Effect.runPromise
-    );
+    const result = await program.pipe(Effect.provide(layer), Effect.runPromise);
 
     expect(result.data.id).toBe(2);
-  });
-
-  test("should provide client", async () => {
-    const interceptors = Interceptor.of(base_url_interceptor);
-
-    const adapter = Fetch.effect(
-      Interceptor.make(Adapter.fetch, interceptors)
-    );
-
-    const result = await pipe(
-      Client.get("/users/2"),
-      Effect.flatMap(Response.json),
-      Effect.provide(Client.layer),
-      Effect.provide(adapter),
-      Effect.runPromise
-    );
-
-    expect(result.data.id).toBe(2);
-  });
-
-  describe("Client - factory", () => {
-    test("should construct client", async () => {
-      const interceptors = Interceptor.empty().pipe(
-        Interceptor.add(base_url_interceptor),
-        Interceptor.add(pass_through)
-      );
-
-      const client = Client.create({ interceptors, adapter: Adapter.fetch });
-
-      const result = await pipe(
-        Client.get("/users/2"),
-        Effect.flatMap(Response.json),
-        Effect.provide(client),
-        Effect.runPromise
-      );
-
-      expect(result.data.id).toBe(2);
-    });
-
-    test("should construct client with base URL", async () => {
-      const interceptors = Interceptor.of(pass_through);
-
-      const client = Client.create({
-        interceptors,
-        url: base_url,
-        adapter: Adapter.fetch,
-      });
-
-      const result = await pipe(
-        Client.get("/users/2"),
-        Effect.flatMap(Response.json),
-        Effect.provide(client),
-        Effect.runPromise
-      );
-
-      expect(result.data.id).toBe(2);
-    });
-
-    test("should construct client without interceptors", async () => {
-      const client = Client.create({ url: base_url, adapter: Adapter.fetch });
-
-      const result = await pipe(
-        Client.get("/users/2"),
-        Effect.flatMap(Response.json),
-        Effect.provide(client),
-        Effect.runPromise
-      );
-
-      expect(result.data.id).toBe(2);
-    });
   });
 });

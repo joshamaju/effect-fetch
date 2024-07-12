@@ -32,28 +32,27 @@ export function compose(initiator: Effect.Effect<Response, any, Context>) {
           handler = initiator;
         }
 
-        const context = Context.of({
+        const chain = Context.of({
           request,
-          proceed: (newRequest) => dispatch(i + 1, newRequest),
+          proceed: (req) => dispatch(i + 1, req),
         });
 
         // @ts-expect-error
-        return handler.pipe(Effect.provideService(Context, context));
+        return handler.pipe(Effect.provideService(Context, chain));
       }
 
       return dispatch(0, request);
     };
 }
 
-export const intercept = <E, R>(interceptors: Interceptors<E, R>) => {
+export const make = <E, R>(interceptors: Interceptors<E, R>) => {
   return Effect.gen(function* () {
     const fetch = yield* Fetch;
 
     const handler = compose(
       Effect.gen(function* () {
         const { request } = yield* Context;
-        const { url, init } = request;
-        return yield* fetch(url, init);
+        return yield* fetch(request.url, request.init);
       })
     );
 
@@ -63,17 +62,12 @@ export const intercept = <E, R>(interceptors: Interceptors<E, R>) => {
   });
 };
 
-export const make = dual<
-  <E, R>(
-    interceptors: Interceptors<E, R>
-  ) => (fetch: Adapter) => Effect.Effect<Adapter, E, Exclude<R, Context>>,
-  <E, R>(
-    fetch: Adapter,
-    interceptors: Interceptors<E, R>
-  ) => Effect.Effect<Adapter, E, Exclude<R, Context>>
->(2, (fetch, interceptors) => {
-  return intercept(interceptors).pipe(Effect.provideService(Fetch, fetch));
-});
+export const provide = <E, R>(
+  interceptor: Effect.Effect<Adapter, E, R | Fetch>,
+  fetch: Adapter,
+) => {
+  return interceptor.pipe(Effect.provideService(Fetch, fetch));
+};
 
 export const copy = <E, R>(interceptors: Interceptors<E, R>) => {
   return Chunk.unsafeFromArray([...Chunk.toArray(interceptors)]);

@@ -9,6 +9,7 @@ import { Tag } from "effect/Context";
 import * as internal from "./internal/interceptor.js";
 import { HttpRequest } from "./internal/request.js";
 import { HttpError } from "./Error.js";
+import { dual } from "effect/Function";
 
 /** @internal */
 export type Merge<
@@ -91,9 +92,9 @@ export const copy: <E, R>(
  * @since 1.0.0
  * @category constructors
  */
-export const makeFetch: <E, R>(
+export const make: <E, R>(
   interceptors: Interceptors<E, R>
-) => Effect<Adapter, E, Exclude<R, Context> | Fetch> = internal.intercept;
+) => Effect<Adapter, E, Exclude<R, Context> | Fetch> = internal.make;
 
 /**
  * Provides the given platform adapter to the interceptor `Fetch` wrapper
@@ -101,13 +102,23 @@ export const makeFetch: <E, R>(
  * @since 1.0.0
  * @category constructors
  */
-export const make: {
-  <E, R>(interceptors: Interceptors<E, R>): (
-    fetch: Adapter
-  ) => Effect<Adapter, E, Exclude<R, Context>>;
-  <R, E>(fetch: Adapter, interceptors: Interceptors<E, R>): Effect<
+export const provide: {
+  <E, R>(fetch: Adapter): (
+    interceptor: Effect<Adapter, E, R | Fetch>
+  ) => Effect<Adapter, E, Exclude<R, Fetch>>;
+  <E, R>(interceptor: Effect<Adapter, E, R | Fetch>, fetch: Adapter): Effect<
     Adapter,
     E,
-    Exclude<R, Context>
+    Exclude<R, Fetch>
   >;
-} = internal.make;
+} = dual<
+  <E, R>(
+    fetch: Adapter
+  ) => (
+    interceptor: Effect<Adapter, E, R | Fetch>
+  ) => Effect<Adapter, E, Exclude<R, Fetch>>,
+  <E, R>(
+    interceptor: Effect<Adapter, E, R | Fetch>,
+    fetch: Adapter,
+  ) => Effect<Adapter, E, Exclude<R, Fetch>>
+>(2, (interceptor, fetch) => internal.provide(interceptor, fetch));

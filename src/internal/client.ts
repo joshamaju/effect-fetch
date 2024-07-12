@@ -5,7 +5,12 @@ import * as Layer from "effect/Layer";
 import { Config, Client, Handler } from "../Client.js";
 import * as Fetch from "../Fetch.js";
 import type { Merge } from "../Interceptor.js";
-import { copy, empty, make as makeAdapter } from "../Interceptor.js";
+import {
+  copy,
+  empty,
+  provide,
+  make as makeInterceptor,
+} from "../Interceptor.js";
 import { Url } from "../Interceptors/Url.js";
 import { filterStatusOk } from "./response/index.js";
 
@@ -51,9 +56,11 @@ export const create = <E, R>({
     ? Chunk.prepend(clone, interceptor)
     : clone;
 
-  return Chunk.isEmpty(newInterceptors)
-    ? Fetch.make(adapter)
-    : Fetch.effect(makeAdapter(adapter, newInterceptors));
+  const adapter_ = Chunk.isEmpty(newInterceptors)
+    ? Effect.succeed(adapter)
+    : provide(makeInterceptor(newInterceptors), adapter);
+
+    return make.pipe(Effect.provide(Fetch.effect(adapter_)))
 };
 
 export const layer = Layer.effect(Client, make);
