@@ -38,6 +38,19 @@ class Err {
 
 const error_interceptor = Effect.fail(new Err());
 
+const makeClient = <A, E, R>(effect: Effect.Effect<A, E, R | Fetch.Fetch>) => {
+  const interceptors = Interceptor.empty().pipe(
+    Interceptor.add(base_url_interceptor)
+  );
+
+  const interceptor = Interceptor.provide(
+    Interceptor.make(interceptors),
+    Adapter.fetch
+  );
+
+  return Effect.provide(effect, Fetch.effect(interceptor));
+};
+
 test("google", async () => {
   const result = await pipe(
     Fetch.fetch("https://www.google.com"),
@@ -67,6 +80,12 @@ test("streaming", async () => {
   );
 
   expect(result).toContain("Google");
+});
+
+test("with client factory", async () => {
+  const program = Effect.flatMap(Fetch.fetch("/users/2"), Response.json);
+  const result = await Effect.runPromise(makeClient(program));
+  expect(result.data.id).toBe(2);
 });
 
 describe("Interceptors", () => {
