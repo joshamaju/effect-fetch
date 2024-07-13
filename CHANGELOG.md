@@ -1,5 +1,15 @@
 # effect-fetch
 
+## 2.0.0
+
+### Major Changes
+
+- 7d0b6ae: Upgrade effect
+
+### Minor Changes
+
+- da12ae5: Provide client type simplifier
+
 ## 1.4.0
 
 ### Minor Changes
