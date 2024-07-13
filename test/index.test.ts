@@ -88,6 +88,27 @@ test("with client factory", async () => {
   expect(result.data.id).toBe(2);
 });
 
+test("fetch with Effect.gen", async () => {
+  const newAdapter = pipe(
+    Interceptor.make(Interceptor.of(base_url_interceptor)),
+    Effect.provide(adapter),
+    Fetch.effect
+  );
+
+  const program = Effect.gen(function*() {
+    const fetch = yield* Fetch.Fetch;
+    const res = yield* fetch("/users/2")
+    return yield* Response.json(res)
+  })
+
+  const result = await program.pipe(
+    Effect.provide(newAdapter),
+    Effect.runPromise
+  );
+
+  expect(result.data.id).toBe(2);
+});
+
 describe("Interceptors", () => {
   test("single", async () => {
     const newAdapter = pipe(
