@@ -89,7 +89,7 @@ export const copy: <E, R>(
 /**
  * Creates the intercepting wrapper around the provided platform adapter
  *
- * @since 1.0.0
+ * @since 2.0.0
  * @category constructors
  */
 export const make: <E, R>(
@@ -99,7 +99,7 @@ export const make: <E, R>(
 /**
  * Provides the given platform adapter to the interceptor `Fetch` wrapper
  *
- * @since 1.0.0
+ * @since 2.0.0
  * @category constructors
  */
 export const provide: {
