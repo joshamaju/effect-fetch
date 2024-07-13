@@ -22,6 +22,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",
+    "example": "tsx ./example/index.ts",
     "prepublish": "pnpm clean && pnpm build"
   },
   "files": [
@@ -43,6 +44,7 @@
     "effect": "^3.5.1",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.1",
+    "tsx": "^4.16.2",
     "typescript": "^5.2.2",
     "vitest": "^1.0.4"
   },
