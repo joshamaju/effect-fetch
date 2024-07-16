@@ -7,7 +7,7 @@ import type { Effect } from "effect/Effect";
 import { serviceFunctions } from "effect/Effect";
 
 import { Adapter, Fetch } from "./Fetch.js";
-import { Context, Interceptors } from "./Interceptor.js";
+import { Chain, Interceptors } from "./Interceptor.js";
 import { HttpError } from "./internal/error.js";
 import { HttpRequest } from "./internal/request.js";
 import { StatusError } from "./Error.js";
@@ -64,7 +64,7 @@ export const layer: Layer<Client, never, Fetch> = internal.layer;
  */
 export const create: <E = never, R = never>(
   config: Config<E, R>
-) => Effect<Handlers, E | HttpError, Exclude<Exclude<R, Context>, Fetch>> = internal.create;
+) => Effect<Handlers, E | HttpError, Exclude<Exclude<R, Chain>, Fetch>> = internal.create;
 
 const handlers = serviceFunctions(make);
 

@@ -2,6 +2,7 @@
  * @since 1.0.0
  */
 import type { Effect } from "effect/Effect";
+
 import { DecodeError } from "./internal/error.js";
 import * as internal from "./internal/request.js";
 import { Body } from "./internal/body.js";

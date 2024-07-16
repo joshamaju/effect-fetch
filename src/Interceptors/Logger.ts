@@ -84,7 +84,7 @@ function logHeader(headers: Headers, headersToRedact: string[]) {
 
 const logger = (level: Level, headersToRedact: string[] = []) => {
   return Effect.gen(function* () {
-    const context = yield* Interceptor.Context;
+    const context = yield* Interceptor.Chain;
     const request = context.request;
 
     if (level == Level.NONE) {

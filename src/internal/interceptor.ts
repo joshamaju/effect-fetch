@@ -1,15 +1,14 @@
 import * as Cause from "effect/Cause";
 import * as Chunk from "effect/Chunk";
 import * as Effect from "effect/Effect";
-import { dual } from "effect/Function";
 import * as Option from "effect/Option";
 
 import { Adapter, Fetch } from "../Fetch.js";
-import { Context, Interceptors } from "../Interceptor.js";
+import { Chain, Interceptors } from "../Interceptor.js";
 import { HttpError } from "./error.js";
 import { HttpRequest } from "./request.js";
 
-export function compose(initiator: Effect.Effect<Response, any, Context>) {
+export function compose(initiator: Effect.Effect<Response, any, Chain>) {
   return <E, R>(interceptors: Interceptors<E, R>) =>
     (request: HttpRequest) => {
       let index = -1;
@@ -32,13 +31,13 @@ export function compose(initiator: Effect.Effect<Response, any, Context>) {
           handler = initiator;
         }
 
-        const chain = Context.of({
+        const chain = Chain.of({
           request,
           proceed: (req) => dispatch(i + 1, req),
         });
 
         // @ts-expect-error
-        return handler.pipe(Effect.provideService(Context, chain));
+        return handler.pipe(Effect.provideService(Chain, chain));
       }
 
       return dispatch(0, request);
@@ -51,7 +50,7 @@ export const make = <E, R>(interceptors: Interceptors<E, R>) => {
 
     const handler = compose(
       Effect.gen(function* () {
-        const { request } = yield* Context;
+        const { request } = yield* Chain;
         return yield* fetch(request.url, request.init);
       })
     );

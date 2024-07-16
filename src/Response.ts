@@ -3,6 +3,8 @@
  */
 import { Effect } from "effect/Effect";
 import { dual } from "effect/Function";
+import { Predicate } from "effect/Predicate";
+
 import * as internal from "./internal/response/index.js";
 import { DecodeError } from "./internal/error.js";
 import {
@@ -11,7 +13,6 @@ import {
   StatusErrorT,
 } from "./internal/response/index.js";
 import { NotOkStatusCode, OkStatusCode } from "./internal/response/types.js";
-import { Predicate } from "effect/Predicate";
 
 export {
   /**
