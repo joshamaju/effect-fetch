@@ -1,4 +1,4 @@
-export type OkStatusCode =
+export type StatusOK =
   | 200 // OK
   | 201 // Created
   | 202 // Accepted
@@ -15,7 +15,7 @@ export type StatusCode =
   | 101 // Switching Protocols
   | 102 // Processing
   | 103 // Early Hints
-  | OkStatusCode
+  | StatusOK
   | 300 // Multiple Choices
   | 301 // Moved Permanently
   | 302 // Found
@@ -66,4 +66,4 @@ export type StatusCode =
   | 510 // Not Extended
   | 511; // Network Authentication Required
 
-  export type NotOkStatusCode = Exclude<StatusCode, OkStatusCode>
+  export type StatusNotOK = Exclude<StatusCode, StatusOK>

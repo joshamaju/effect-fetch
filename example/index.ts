@@ -16,7 +16,7 @@ const program = Effect.gen(function* () {
   console.log(users);
 });
 
-const matchOk = Match.type<Result.OkStatusCode>().pipe(
+const matchOk = Match.type<Result.StatusOK>().pipe(
   Match.when(200, () => "200"),
   Match.when(201, () => "201"),
   Match.when(202, () => "202"),
@@ -38,7 +38,7 @@ const matchNotOk = Match.type<Response>().pipe(
 
 const status = Fetch.fetch("/users/2").pipe(
   Effect.andThen(Result.filterStatusOk),
-  Effect.andThen((res) => matchOk(res.status as Result.OkStatusCode)),
+  Effect.andThen((res) => matchOk(res.status as Result.StatusOK)),
   Effect.catchTag('StatusError', res => Effect.succeed(matchNotOk(res.response))),
   Effect.andThen(Effect.log),
   Effect.catchAll(Effect.log),

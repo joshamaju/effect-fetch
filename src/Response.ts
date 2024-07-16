@@ -12,7 +12,7 @@ import {
   StatusError,
   StatusErrorT,
 } from "./internal/response/index.js";
-import { NotOkStatusCode, OkStatusCode } from "./internal/response/types.js";
+import { StatusNotOK, StatusOK } from "./internal/response/types.js";
 
 export {
   /**
@@ -22,16 +22,16 @@ export {
   StatusCode,
 
   /**
-   * @since 1.1.0
+   * @since 2.1.0
    * @category status code
    */
-  OkStatusCode,
+  StatusOK,
 
   /**
-   * @since 1.1.0
+   * @since 2.1.0
    * @category status code
    */
-  NotOkStatusCode,
+  StatusNotOK,
 } from "./internal/response/types.js";
 
 export {
@@ -99,7 +99,7 @@ export const filterStatusOk: (
  */
 export const filterStatusOkT: (
   response: Response
-) => Effect<ResponseT<OkStatusCode>, StatusErrorT<NotOkStatusCode>, never> =
+) => Effect<ResponseT<StatusOK>, StatusErrorT<StatusNotOK>, never> =
   internal.filterStatusOkT;
 
 /**

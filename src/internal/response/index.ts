@@ -4,7 +4,7 @@ import type { Predicate } from "effect/Predicate";
 
 import { DecodeError } from "../error.js";
 import { decode } from "../utils.js";
-import { NotOkStatusCode, OkStatusCode, StatusCode } from "./types.js";
+import { StatusNotOK, StatusOK, StatusCode } from "./types.js";
 
 export class StatusError {
   readonly _tag = "StatusError";
@@ -41,8 +41,8 @@ export interface ResponseT<S extends StatusCode> extends Response {
 export const filterStatusOkT = flow(
   filterStatusOk,
   Effect.mapBoth({
-    onSuccess: (r) => r as ResponseT<OkStatusCode>,
-    onFailure: (e) => e as StatusErrorT<NotOkStatusCode>,
+    onSuccess: (r) => r as ResponseT<StatusOK>,
+    onFailure: (e) => e as StatusErrorT<StatusNotOK>,
   })
 );
 
