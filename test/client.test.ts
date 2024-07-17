@@ -16,7 +16,7 @@ const base_url = "https://reqres.in/api";
 
 const base_url_interceptor = BaseUrl.Url(base_url);
 
-test("should make client with http method methods", async () => {
+test("should make client with http methods", async () => {
   const interceptors = Interceptor.of(base_url_interceptor);
 
   const adapter = pipe(
