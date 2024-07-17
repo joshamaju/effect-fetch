@@ -12,6 +12,7 @@ import { HttpError } from "./internal/error.js";
 import { HttpRequest } from "./internal/request.js";
 import { StatusError } from "./Error.js";
 import * as internal from "./internal/client.js";
+import { Body } from "./internal/body.js";
 
 /** @internal */
 export type Config<E, R> = {
@@ -23,7 +24,7 @@ export type Config<E, R> = {
 /** @internal */
 export type Handler = (
   url: string | URL | HttpRequest,
-  init?: RequestInit | undefined
+  init?: RequestInit | Omit<RequestInit, 'body'> & {body?: Body | BodyInit} | Body | undefined
 ) => Effect<Response, HttpError | StatusError, never>;
 
 /**

@@ -13,6 +13,7 @@ import {
 } from "../Interceptor.js";
 import { Url } from "../Interceptors/Url.js";
 import { filterStatusOk } from "./response/index.js";
+import { isBody } from "./body.js";
 
 type Method = NonNullable<RequestInit["method"]>;
 
@@ -21,7 +22,42 @@ export const make = Effect.gen(function* () {
 
   const withMethod = (method: Method): Handler => {
     return (url, init) => {
-      return Effect.flatMap(fetch(url, { ...init, method }), filterStatusOk);
+      let body: RequestInit['body'];
+      let headers: RequestInit['headers'];
+
+      if (isBody(init)) {
+        body = init.value;
+        if (init.headers) headers = init.headers;
+      } else {
+        let local_body = init?.body;
+        let local_headers = init?.headers;
+
+        if (local_body && isBody(local_body)) {
+          const body = local_body;
+
+          if (local_headers) {
+            const headers = new Headers(local_headers);
+
+            for (const key in body.headers) {
+              headers.set(key, body.headers[key]);
+            }
+
+            local_headers = headers;
+          } else {
+            local_headers = body.headers;
+          }
+
+          local_body = body.value;
+        }
+
+        body = local_body
+        headers = local_headers
+      }
+
+      return Effect.flatMap(
+        fetch(url, { ...init, body, method, headers }),
+        filterStatusOk
+      );
     };
   };
 
@@ -60,7 +96,7 @@ export const create = <E, R>({
     ? Effect.succeed(adapter)
     : provide(makeInterceptor(newInterceptors), adapter);
 
-    return make.pipe(Effect.provide(Fetch.effect(adapter_)))
+  return make.pipe(Effect.provide(Fetch.effect(adapter_)));
 };
 
 export const layer = Layer.effect(Client, make);
