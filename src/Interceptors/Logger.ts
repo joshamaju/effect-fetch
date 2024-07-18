@@ -4,9 +4,7 @@
 import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
-import * as HashMap from "effect/HashMap";
-import * as List from "effect/List";
-import * as Logger from "effect/Logger";
+
 import * as Interceptor from "../Interceptor.js";
 
 // Reference: https://github.com/square/okhttp/blob/30780c879bd0d28b49f264fac2fe05da85aef3ad/okhttp-logging-interceptor/src/main/kotlin/okhttp3/logging/HttpLoggingInterceptor.kt#L50C3-L107C4
@@ -143,69 +141,7 @@ const logger = (level: Level, headersToRedact: string[] = []) => {
     }
 
     return response;
-  }).pipe(Effect.provide(Logger.replace(Logger.defaultLogger, stringLogger)));
-};
-
-const stringLogger = Logger.make(
-  ({ annotations, cause, date, logLevel, message, spans }) => {
-    const nowMillis = date.getTime();
-
-    let output = `${date.toISOString()} [${logLevel.label}]`;
-
-    if (cause != null && cause._tag !== "Empty") {
-      output = output + " " + Cause.pretty(cause);
-    }
-
-    if (List.isCons(spans)) {
-      output = output + " ";
-
-      let first = true;
-
-      for (const span of spans) {
-        if (first) {
-          first = false;
-        } else {
-          output = output + " ";
-        }
-
-        const label = span.label.replace(/[\s="]/g, "_");
-        output = output + `[${label}:${nowMillis - span.startTime}ms]`;
-      }
-    }
-
-    if (HashMap.size(annotations) > 0) {
-      output = output + " ";
-
-      let first = true;
-
-      for (const [key, value] of annotations) {
-        if (first) {
-          first = false;
-        } else {
-          output = output + " ";
-        }
-
-        // output = output + filterKeyName(key);
-        output = output + `[${key}:${serializeUnknown(value)}]`;
-      }
-    }
-
-    const strMessage = message as string;
-
-    if (strMessage.length > 0) {
-      output = output + " " + strMessage;
-    }
-
-    console.log(output);
-  }
-);
-
-const serializeUnknown = (u: unknown): string => {
-  try {
-    return typeof u === "object" ? JSON.stringify(u) : String(u);
-  } catch (_) {
-    return String(u);
-  }
+  })
 };
 
 export {
@@ -213,5 +149,6 @@ export {
    * @since 1.0.0
    * @category interceptor
    */
-  logger as Logger,
+  logger as Logger
 };
+
