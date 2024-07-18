@@ -127,20 +127,29 @@ test("should copy/inherit interceptors", async () => {
 });
 
 test("should attach url to every outgoing request", async () => {
-  const interceptors = Interceptor.of(base_url_interceptor);
+  const spy = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    expect(chain.request.url).toBe("/users/2");
+    const res = yield* chain.proceed(chain.request);
+    expect(res.url).toBe("https://reqres.in/api/users/2");
+    return res;
+  });
 
-  const adapter = Interceptor.make(interceptors).pipe(
-    Interceptor.provide(Adapter.fetch)
+  const interceptors = Interceptor.of(spy).pipe(
+    Interceptor.add(base_url_interceptor)
   );
 
-  const result = await pipe(
+  const adapter = Interceptor.provide(
+    Interceptor.make(interceptors),
+    Adapter.fetch
+  );
+
+  await pipe(
     Fetch.fetch("/users/2"),
     Effect.flatMap(Response.json),
     Effect.provide(Fetch.effect(adapter)),
     Effect.runPromise
   );
-
-  expect(result.data.id).toBe(2);
 });
 
 test("should make interceptor from effect", async () => {
