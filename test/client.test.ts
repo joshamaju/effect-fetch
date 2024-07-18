@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, describe } from "vitest";
 
 import * as Effect from "effect/Effect";
 import { pipe } from "effect/Function";
@@ -128,5 +128,40 @@ test("should attach JSON body and headers with custom headers", async () => {
   expect(result).toMatchObject({
     name: "morpheus",
     job: "leader",
+  });
+});
+
+describe("method", () => {
+  const check = (method: string) => {
+    return Effect.flatMap(Interceptor.Chain, (chain) => {
+      expect(chain.request.init?.method).toBe(method);
+      return Effect.succeed(new globalThis.Response(""));
+    });
+  };
+
+  test("POST", async () => {
+    const interceptors = Interceptor.of(check("POST"));
+
+    const interceptor = pipe(
+      Interceptor.make(interceptors),
+      Interceptor.provide(Adapter.fetch)
+    );
+
+    await Effect.runPromise(
+      Effect.provide(Http.post("/users/2"), Fetch.effect(interceptor))
+    );
+  });
+
+  test("HEAD", async () => {
+    const interceptors = Interceptor.of(check("HEAD"));
+
+    const interceptor = pipe(
+      Interceptor.make(interceptors),
+      Interceptor.provide(Adapter.fetch)
+    );
+
+    await Effect.runPromise(
+      Effect.provide(Http.head("/users/2"), Fetch.effect(interceptor))
+    );
   });
 });
