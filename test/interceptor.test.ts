@@ -8,6 +8,7 @@ import * as Fiber from "effect/Fiber";
 import { pipe } from "effect/Function";
 import * as TestClock from "effect/TestClock";
 import * as TestContext from "effect/TestContext";
+import * as Context from "effect/Context";
 
 import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Fetch from "../src/Fetch.js";
@@ -157,6 +158,34 @@ test("should make interceptor from effect", async () => {
     Fetch.fetch("/users/2"),
     Effect.flatMap(Response.json),
     Effect.provide(adapter),
+    Effect.runPromise
+  );
+
+  expect(result.data.id).toBe(2);
+});
+
+test("should make interceptor from effect with additional requirements", async () => {
+  const Store = Context.GenericTag<{ get: Effect.Effect<string> }>(
+    "interceptor-test"
+  );
+
+  const interceptor = Effect.gen(function* () {
+    const url = yield* (yield* Store).get;
+    return yield* BaseUrl.Url(url);
+  });
+
+  const adapter = Fetch.effect(
+    Interceptor.provide(
+      Interceptor.make(Interceptor.of(interceptor)),
+      Adapter.fetch
+    )
+  );
+
+  const result = await pipe(
+    Fetch.fetch("/users/2"),
+    Effect.flatMap(Response.json),
+    Effect.provide(adapter),
+    Effect.provideService(Store, { get: Effect.succeed(base_url) }),
     Effect.runPromise
   );
 
