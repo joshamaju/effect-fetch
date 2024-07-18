@@ -1,15 +1,21 @@
 import { expect, test } from "vitest";
 
 import * as Chunk from "effect/Chunk";
+import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Either from "effect/Either";
+import * as Fiber from "effect/Fiber";
 import { pipe } from "effect/Function";
+import * as TestClock from "effect/TestClock";
+import * as TestContext from "effect/TestContext";
 
 import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Fetch from "../src/Fetch.js";
 import * as Interceptor from "../src/Interceptor.js";
 import * as Response from "../src/Response.js";
 
+import { TimeoutException } from "effect/Cause";
+import { Timeout } from "../src/Interceptors/Timeout.js";
 import * as BaseUrl from "../src/Interceptors/Url.js";
 
 const adapter = Fetch.make(Adapter.fetch);
@@ -155,4 +161,37 @@ test("should make interceptor from effect", async () => {
   );
 
   expect(result.data.id).toBe(2);
+});
+
+test("request timeout interceptor", async () => {
+  const program = Effect.flatMap(
+    Fetch.fetch("/users/2?delay=10"),
+    Response.json
+  );
+
+  const clock = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    const res = yield* Effect.fork(chain.proceed(chain.request));
+    yield* TestClock.adjust(Duration.seconds(10));
+    return yield* Fiber.join(res);
+  });
+
+  const interceptors = Interceptor.of(base_url_interceptor).pipe(
+    Interceptor.add(Timeout(Duration.seconds(5))),
+    Interceptor.add(clock)
+  );
+
+  const adapter = Interceptor.make(interceptors).pipe(
+    Interceptor.provide(Adapter.fetch)
+  );
+
+  const result = await program.pipe(
+    Effect.provide(TestContext.TestContext),
+    Effect.provide(Fetch.effect(adapter)),
+    Effect.either,
+    Effect.runPromise
+  );
+
+  expect(Either.isLeft(result)).toBeTruthy();
+  expect((result as Either.Left<any, any>).left).instanceOf(TimeoutException);
 });
