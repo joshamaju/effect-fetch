@@ -68,7 +68,7 @@ test("should attach JSON body and headers", async () => {
   const spy = Effect.flatMap(Interceptor.Chain, (chain) => {
     const headers = new Headers(chain.request.init?.headers);
 
-    expect(typeof chain.request.init?.body).toBe("string");
+    expect(chain.request.init?.body).toBe('{"name":"morpheus","job":"leader"}')
     expect(headers.get("Content-Type")).toBe("application/json");
     expect(headers.has("Content-Length")).toBeTruthy();
 
