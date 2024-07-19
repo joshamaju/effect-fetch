@@ -59,6 +59,7 @@ export class Client extends Tag("effect-fetch/Client")<Client, Handlers>() {}
 /**
  * @since 1.3.0
  * @category constructor
+ * @deprecated
  */
 export const make: Effect<Handlers, never, Fetch> = internal.make;
 
