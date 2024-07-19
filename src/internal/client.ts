@@ -2,7 +2,7 @@ import * as Chunk from "effect/Chunk";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 
-import { Client, Config, Handler } from "../Client.js";
+import { Client, Config, Handler, Handlers } from "../Client.js";
 import * as Fetch from "../Fetch.js";
 import type { Interceptor, Interceptors, Merge } from "../Interceptor.js";
 import {
@@ -119,4 +119,5 @@ export const create = <E, R>({
   return Effect.provide(make, Fetch.effect(adapter_));
 };
 
-export const layer = Layer.effect(Client, make);
+export const layer = <E, R>(client: Effect.Effect<Handlers, E, R>) =>
+  Layer.effect(Client, client);

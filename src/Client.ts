@@ -67,7 +67,9 @@ export const make: Effect<Handlers, never, Fetch> = internal.make;
  * @since 1.3.0
  * @category constructor
  */
-export const layer: Layer<Client, never, Fetch> = internal.layer;
+export const layer: <E, R>(
+  client: Effect<Handlers, E, R>
+) => Layer<Client, E, R> = internal.layer;
 
 /**
  * @since 1.4.0

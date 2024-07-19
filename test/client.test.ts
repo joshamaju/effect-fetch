@@ -1,23 +1,22 @@
-import { expect, test, describe } from "vitest";
+import { describe, expect, test } from "vitest";
 
+import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
+import * as Either from "effect/Either";
+import * as Fiber from "effect/Fiber";
 import { pipe } from "effect/Function";
 import * as Layer from "effect/Layer";
-import * as Fiber from "effect/Fiber";
-import * as Either from "effect/Either";
-import * as Duration from "effect/Duration";
 import * as TestClock from "effect/TestClock";
 import * as TestContext from "effect/TestContext";
-import * as Context from "effect/Context";
 
+import { TimeoutException } from "effect/Cause";
 import * as Adapter from "../src/Adapters/Fetch.js";
+import * as Http from "../src/Client.js";
 import * as Fetch from "../src/Fetch.js";
 import * as Interceptor from "../src/Interceptor.js";
-import * as Response from "../src/Response.js";
 import * as BaseUrl from "../src/Interceptors/Url.js";
-import * as Http from "../src/Client.js";
 import { json } from "../src/internal/body.js";
-import { TimeoutException } from "effect/Cause";
+import * as Response from "../src/Response.js";
 
 const base_url = "https://reqres.in/api";
 
@@ -49,9 +48,10 @@ test("should make client with base URL for every request", async () => {
   });
 
   const client = Http.create({ url: base_url, adapter: Adapter.fetch });
-  const layer = Layer.effect(Http.Client, client);
 
-  const result = await Effect.runPromise(Effect.provide(program, layer));
+  const result = await Effect.runPromise(
+    Effect.provide(program, Http.layer(client))
+  );
 
   expect(result.data.id).toBe(2);
 });
@@ -64,9 +64,11 @@ test("should make client with interceptors", async () => {
 
   const interceptors = Interceptor.of(base_url_interceptor);
   const client = Http.create({ interceptors, adapter: Adapter.fetch });
-  const layer = Layer.effect(Http.Client, client);
 
-  const result = await program.pipe(Effect.provide(layer), Effect.runPromise);
+  const result = await program.pipe(
+    Effect.provide(Http.layer(client)),
+    Effect.runPromise
+  );
 
   expect(result.data.id).toBe(2);
 });
@@ -141,7 +143,7 @@ test("should attach JSON body and headers with custom headers", async () => {
 describe("timeout", () => {
   const program = Effect.gen(function* () {
     const client = yield* Http.Client;
-    return yield* client.get("/users/2?delay=10")
+    return yield* client.get("/users/2?delay=10");
   });
 
   const clock = Effect.gen(function* () {
@@ -159,10 +161,8 @@ describe("timeout", () => {
       interceptors: Interceptor.of(clock),
     });
 
-    const layer = Layer.effect(Http.Client, client);
-
     const result = await program.pipe(
-      Effect.provide(layer),
+      Effect.provide(Http.layer(client)),
       Effect.provide(TestContext.TestContext),
       Effect.either,
       Effect.runPromise
@@ -180,10 +180,8 @@ describe("timeout", () => {
       interceptors: Interceptor.of(clock),
     });
 
-    const layer = Layer.effect(Http.Client, client);
-
     const result = await program.pipe(
-      Effect.provide(layer),
+      Effect.provide(Http.layer(client)),
       Effect.provide(TestContext.TestContext),
       Effect.either,
       Effect.runPromise
