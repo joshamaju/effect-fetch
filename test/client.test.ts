@@ -5,11 +5,10 @@ import * as Effect from "effect/Effect";
 import * as Either from "effect/Either";
 import * as Fiber from "effect/Fiber";
 import { pipe } from "effect/Function";
-import * as Layer from "effect/Layer";
 import * as TestClock from "effect/TestClock";
 import * as TestContext from "effect/TestContext";
-
 import { TimeoutException } from "effect/Cause";
+
 import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Http from "../src/Client.js";
 import * as Fetch from "../src/Fetch.js";
