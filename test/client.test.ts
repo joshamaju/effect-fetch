@@ -3,6 +3,12 @@ import { expect, test, describe } from "vitest";
 import * as Effect from "effect/Effect";
 import { pipe } from "effect/Function";
 import * as Layer from "effect/Layer";
+import * as Fiber from "effect/Fiber";
+import * as Either from "effect/Either";
+import * as Duration from "effect/Duration";
+import * as TestClock from "effect/TestClock";
+import * as TestContext from "effect/TestContext";
+import * as Context from "effect/Context";
 
 import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Fetch from "../src/Fetch.js";
@@ -11,6 +17,7 @@ import * as Response from "../src/Response.js";
 import * as BaseUrl from "../src/Interceptors/Url.js";
 import * as Http from "../src/Client.js";
 import { json } from "../src/internal/body.js";
+import { TimeoutException } from "effect/Cause";
 
 const base_url = "https://reqres.in/api";
 
@@ -68,7 +75,7 @@ test("should attach JSON body and headers", async () => {
   const spy = Effect.flatMap(Interceptor.Chain, (chain) => {
     const headers = new Headers(chain.request.init?.headers);
 
-    expect(chain.request.init?.body).toBe('{"name":"morpheus","job":"leader"}')
+    expect(chain.request.init?.body).toBe('{"name":"morpheus","job":"leader"}');
     expect(headers.get("Content-Type")).toBe("application/json");
     expect(headers.has("Content-Length")).toBeTruthy();
 
@@ -128,6 +135,62 @@ test("should attach JSON body and headers with custom headers", async () => {
   expect(result).toMatchObject({
     name: "morpheus",
     job: "leader",
+  });
+});
+
+describe("timeout", () => {
+  const program = Effect.gen(function* () {
+    const client = yield* Http.Client;
+    return yield* client.get("/users/2?delay=10")
+  });
+
+  const clock = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    const res = yield* Effect.fork(chain.proceed(chain.request));
+    yield* TestClock.adjust(Duration.seconds(10));
+    return yield* Fiber.join(res);
+  });
+
+  test("with number timeout", async () => {
+    const client = Http.create({
+      timeout: 100,
+      url: base_url,
+      adapter: Adapter.fetch,
+      interceptors: Interceptor.of(clock),
+    });
+
+    const layer = Layer.effect(Http.Client, client);
+
+    const result = await program.pipe(
+      Effect.provide(layer),
+      Effect.provide(TestContext.TestContext),
+      Effect.either,
+      Effect.runPromise
+    );
+
+    expect(Either.isLeft(result)).toBeTruthy();
+    expect((result as Either.Left<any, any>).left).instanceOf(TimeoutException);
+  });
+
+  test("with Duration timeout", async () => {
+    const client = Http.create({
+      url: base_url,
+      adapter: Adapter.fetch,
+      timeout: Duration.seconds(5),
+      interceptors: Interceptor.of(clock),
+    });
+
+    const layer = Layer.effect(Http.Client, client);
+
+    const result = await program.pipe(
+      Effect.provide(layer),
+      Effect.provide(TestContext.TestContext),
+      Effect.either,
+      Effect.runPromise
+    );
+
+    expect(Either.isLeft(result)).toBeTruthy();
+    expect((result as Either.Left<any, any>).left).instanceOf(TimeoutException);
   });
 });
 

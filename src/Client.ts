@@ -5,6 +5,8 @@ import { Tag } from "effect/Context";
 import type { Layer } from "effect/Layer";
 import type { Effect } from "effect/Effect";
 import { serviceFunctions } from "effect/Effect";
+import { TimeoutException } from "effect/Cause";
+import { Duration } from "effect/Duration";
 
 import { Adapter, Fetch } from "./Fetch.js";
 import { Chain, Interceptors } from "./Interceptor.js";
@@ -18,13 +20,20 @@ import { Body } from "./internal/body.js";
 export type Config<E, R> = {
   url?: string;
   adapter: Adapter;
+  timeout?:
+    | number // millis
+    | Duration;
   interceptors?: Interceptors<E, R>;
 };
 
 /** @internal */
 export type Handler = (
   url: string | URL | HttpRequest,
-  init?: RequestInit | Omit<RequestInit, 'body'> & {body?: Body | BodyInit} | Body | undefined
+  init?:
+    | RequestInit
+    | (Omit<RequestInit, "body"> & { body?: Body | BodyInit })
+    | Body
+    | undefined
 ) => Effect<Response, HttpError | StatusError, never>;
 
 /**
@@ -63,9 +72,23 @@ export const layer: Layer<Client, never, Fetch> = internal.layer;
  * @since 1.4.0
  * @category constructor
  */
-export const create: <E = never, R = never>(
-  config: Config<E, R>
-) => Effect<Handlers, E | HttpError, Exclude<Exclude<R, Chain>, Fetch>> = internal.create;
+export const create: {
+  <E = never, R = never>(
+    config: Config<E, R> &
+      Omit<Config<E, R>, "timeout"> & {
+        timeout: number | Duration;
+      }
+  ): Effect<
+    Handlers,
+    E | HttpError | TimeoutException,
+    Exclude<Exclude<R, Chain>, Fetch>
+  >;
+  <E = never, R = never>(config: Config<E, R>): Effect<
+    Handlers,
+    E | HttpError,
+    Exclude<Exclude<R, Chain>, Fetch>
+  >;
+} = internal.create;
 
 const handlers = serviceFunctions(make);
 
