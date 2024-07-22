@@ -78,8 +78,8 @@
       "types": "./dist/dts/adapters/*.d.ts"
     },
     "./interceptors/*": {
-      "import": "./dist/interceptors/*.js",
-      "types": "./dist/dts/interceptors/*.d.ts"
+      "import": "./dist/Interceptors/*.js",
+      "types": "./dist/dts/Interceptors/*.d.ts"
     }
   },
   "peerDependencies": {
