@@ -9,9 +9,12 @@ import { HttpRequest } from "../internal/request.js";
 
 const fetch_: Adapter = (url, init) => {
   return Effect.tryPromise({
-    try: () =>
-      url instanceof HttpRequest ? fetch(url.request) : fetch(url, init),
     catch: (error) => new HttpError(error),
+    try: (signal) => {
+      return url instanceof HttpRequest
+        ? fetch(url.request, { signal })
+        : fetch(url, { signal, ...init });
+    },
   });
 };
 
