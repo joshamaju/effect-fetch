@@ -1,6 +1,8 @@
 import { expect, test } from "vitest";
 
+import { TimeoutException } from "effect/Cause";
 import * as Chunk from "effect/Chunk";
+import * as Context from "effect/Context";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Either from "effect/Either";
@@ -8,14 +10,12 @@ import * as Fiber from "effect/Fiber";
 import { pipe } from "effect/Function";
 import * as TestClock from "effect/TestClock";
 import * as TestContext from "effect/TestContext";
-import * as Context from "effect/Context";
 
 import * as Adapter from "../src/Adapters/Fetch.js";
 import * as Fetch from "../src/Fetch.js";
 import * as Interceptor from "../src/Interceptor.js";
 import * as Response from "../src/Response.js";
 
-import { TimeoutException } from "effect/Cause";
 import { Timeout } from "../src/Interceptors/Timeout.js";
 import * as BaseUrl from "../src/Interceptors/Url.js";
 
@@ -30,6 +30,55 @@ class Err {
 }
 
 const error_interceptor = Effect.fail(new Err());
+
+test("should call interceptors in provided order", async () => {
+  let order: number[] = [];
+
+  const first = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    order.push(1);
+    const res = yield* chain.proceed(chain.request);
+    order.push(1);
+    return res;
+  });
+
+  const second = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    order.push(2);
+    const res = yield* chain.proceed(chain.request);
+    order.push(2);
+    return res;
+  });
+
+  const third = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    order.push(3);
+    const res = yield* chain.proceed(chain.request);
+    order.push(3);
+    return res;
+  });
+
+  const interceptors = Interceptor.empty().pipe(
+    Interceptor.add(first),
+    Interceptor.add(second),
+    Interceptor.add(third)
+  );
+
+  const interceptor = pipe(
+    Interceptor.make(interceptors),
+    Interceptor.provide(Adapter.fetch),
+    Fetch.effect
+  );
+
+  await pipe(
+    Fetch.fetch(base_url + "/users/2"),
+    Effect.flatMap(Response.json),
+    Effect.provide(interceptor),
+    Effect.runPromise
+  );
+
+  expect(order).toStrictEqual([1, 2, 3, 3, 2, 1]);
+});
 
 test("should create handler with single interceptor", async () => {
   const fetchWithInterceptor = pipe(
