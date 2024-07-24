@@ -101,6 +101,47 @@ test("should call interceptors in provided order", async () => {
   expect(order).toStrictEqual([3, 2, 1, 1, 2, 3]);
 });
 
+test("every interceptor should receive the result of the next interceptor", async () => {
+  const first = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    const res = yield* chain.proceed(chain.request);
+    const text = yield* Effect.promise(() => res.text());
+    return new globalThis.Response((parseFloat(text) + 2).toString());
+  });
+
+  const second = Effect.gen(function* () {
+    const chain = yield* Interceptor.Chain;
+    const res = yield* chain.proceed(chain.request);
+    const text = yield* Effect.promise(() => res.text());
+    return new globalThis.Response((parseFloat(text) + 1).toString());
+  });
+
+  const third = Effect.gen(function* () {
+    return new globalThis.Response("1");
+  });
+
+  const interceptors = Interceptor.empty().pipe(
+    Interceptor.add(first),
+    Interceptor.add(second),
+    Interceptor.add(third)
+  );
+
+  const interceptor = pipe(
+    Interceptor.make(interceptors),
+    Interceptor.provide(Adapter.fetch),
+    Fetch.effect
+  );
+
+  const result = await pipe(
+    Fetch.fetch(base_url + "/users/2"),
+    Effect.flatMap(Response.text),
+    Effect.provide(interceptor),
+    Effect.runPromise
+  );
+
+  expect(result).toBe("4");
+});
+
 test("should create handler with single interceptor", async () => {
   const fetchWithInterceptor = pipe(
     Interceptor.make(Interceptor.of(base_url_interceptor)),
