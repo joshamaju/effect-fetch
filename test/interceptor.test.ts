@@ -58,26 +58,47 @@ test("should call interceptors in provided order", async () => {
     return res;
   });
 
-  const interceptors = Interceptor.empty().pipe(
+  const interceptors_asc = Interceptor.empty().pipe(
     Interceptor.add(first),
     Interceptor.add(second),
     Interceptor.add(third)
   );
 
-  const interceptor = pipe(
-    Interceptor.make(interceptors),
+  const interceptor_asc = pipe(
+    Interceptor.make(interceptors_asc),
     Interceptor.provide(Adapter.fetch),
     Fetch.effect
   );
 
   await pipe(
     Fetch.fetch(base_url + "/users/2"),
-    Effect.flatMap(Response.json),
-    Effect.provide(interceptor),
+    Effect.provide(interceptor_asc),
     Effect.runPromise
   );
 
   expect(order).toStrictEqual([1, 2, 3, 3, 2, 1]);
+
+  order = [];
+
+  const interceptors_desc = Interceptor.empty().pipe(
+    Interceptor.add(third),
+    Interceptor.add(second),
+    Interceptor.add(first)
+  );
+
+  const interceptor_desc = pipe(
+    Interceptor.make(interceptors_desc),
+    Interceptor.provide(Adapter.fetch),
+    Fetch.effect
+  );
+
+  await pipe(
+    Fetch.fetch(base_url + "/users/2"),
+    Effect.provide(interceptor_desc),
+    Effect.runPromise
+  );
+
+  expect(order).toStrictEqual([3, 2, 1, 1, 2, 3]);
 });
 
 test("should create handler with single interceptor", async () => {
