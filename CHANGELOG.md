@@ -1,5 +1,23 @@
 # effect-fetch
 
+## 2.1.0
+
+### Minor Changes
+
+- 7d253cd: Add Client layer construction function
+- fd6589c: Rename `Interceptor.Context` to `Interceptor.Chain` for accessing the interceptor request chain inside interceptors
+- e1f5de2: Add request timeout interceptor
+- a9b8769: Rename the Typescript type for exported HTTP status codes
+- 928eb6c: Add support for request timeout when using Client
+- ec988a5: Add request body helpers that attach body data and required headers for json, text and form body types to Client
+
+### Patch Changes
+
+- 587a942: Use correct build file path for default interceptors
+- 3bbdb55: Remove custom pretty logger attached to Logger interceptor
+- 03b687e: Update effect peer dependency version
+- d7f818e: Accept number as timeout durationfor Timeout interceptor
+
 ## 2.0.0
 
 ### Major Changes
