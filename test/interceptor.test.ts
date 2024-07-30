@@ -142,6 +142,41 @@ test("every interceptor should receive the result of the next interceptor", asyn
   expect(result).toBe("4");
 });
 
+test("should return early without calling the next interceptor", async () => {
+  let variable = 1;
+
+  const early = Effect.gen(function* () {
+    return new globalThis.Response("10");
+  });
+
+  const mutate = Effect.gen(function* () {
+    variable = 2;
+    const chain = yield* Interceptor.Chain;
+    return yield* chain.proceed(chain.request);
+  });
+
+  const interceptors = Interceptor.empty().pipe(
+    Interceptor.add(early),
+    Interceptor.add(mutate)
+  );
+
+  const interceptor = pipe(
+    Interceptor.make(interceptors),
+    Interceptor.provide(Adapter.fetch),
+    Fetch.effect
+  );
+
+  const result = await pipe(
+    Fetch.fetch(base_url + "/users/2"),
+    Effect.flatMap(Response.text),
+    Effect.provide(interceptor),
+    Effect.runPromise
+  );
+
+  expect(result).toBe("10");
+  expect(variable).toBe(1);
+});
+
 test("should create handler with single interceptor", async () => {
   const fetchWithInterceptor = pipe(
     Interceptor.make(Interceptor.of(base_url_interceptor)),
