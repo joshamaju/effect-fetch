@@ -109,6 +109,8 @@ const program = Effect.gen(function* () {
 });
 ```
 
+> Interceptors are executed in the order which they were added (top to bottom).
+
 ## Error handling
 
 ```ts
