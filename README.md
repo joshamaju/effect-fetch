@@ -95,6 +95,44 @@ const program = Effect.gen(function* () {
 - Status Filter
 - Bearer and Basic authentication
 
+### Status Filter
+
+To avoid manually forking the response into the error and success paths
+
+```ts
+const program = pipe(
+  Fetch.fetch("/users"),
+  // equivalent to response.ok ? response.json() : // handle not ok status
+  Effect.flatMap((response) => Result.filterStatusOk(response)),
+  Effect.flatMap((response) => response.json()),
+  Effect.catchTag("StatusError", (error) => error)
+);
+```
+
+We can delegate that to an interceptor. So we can decode the response body without worrying about the OK status
+
+```ts
+const program = pipe(
+  Fetch.fetch("/users"),
+  Effect.flatMap((response) => response.json())
+);
+
+const interceptors = Interceptor.of(StatusOK);
+
+const interceptor = Interceptor.provide(
+  Interceptor.make(interceptors),
+  Adapter.fetch
+);
+
+const adapter = Fetch.effect(interceptor);
+
+const result = await program.pipe(
+  Effect.provide(adapter),
+  Effect.catchTag("StatusError", (error) => error),
+  Effect.runPromise
+);
+```
+
 ### Writing your own interceptor
 
 ```ts
