@@ -1,0 +1,96 @@
+{
+  "name": "effect-fetch",
+  "version": "0.0.1",
+  "description": "fetch + interceptors + strongly typed errors",
+  "type": "module",
+  "homepage": "https://github.com/joshamaju/effect-fetch",
+  "main": "./dist/index.js",
+  "types": "./dist/dts/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshamaju/effect-fetch.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --w",
+    "docs": "docgen",
+    "test": "vitest run",
+    "clean": "rimraf dist",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish",
+    "prepublish": "pnpm clean && pnpm build"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "keywords": [
+    "fetch",
+    "http",
+    "ajax",
+    "interceptors"
+  ],
+  "author": "Joshua Amaju <joshsemail4work@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@effect/docgen": "^0.3.4",
+    "effect": "^3.5.7",
+    "fp-ts": "^2.16.9",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.16.2",
+    "typescript": "^5.2.2",
+    "vitest": "^1.0.4"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/dts/index.d.ts"
+    },
+    "./Fetch": {
+      "import": "./dist/Fetch.js",
+      "types": "./dist/dts/Fetch.d.ts"
+    },
+    "./Request": {
+      "import": "./dist/Request.js",
+      "types": "./dist/dts/Request.d.ts"
+    },
+    "./Response": {
+      "import": "./dist/Response.js",
+      "types": "./dist/dts/Response.d.ts"
+    },
+    "./Interceptor": {
+      "import": "./dist/Interceptor.js",
+      "types": "./dist/dts/Interceptor.d.ts"
+    },
+    "./Error": {
+      "import": "./dist/Error.js",
+      "types": "./dist/dts/Error.d.ts"
+    },
+    "./Adapters": {
+      "import": "./dist/adapters/index.js",
+      "types": "./dist/dts/adapters/index.d.ts"
+    },
+    "./Adapters/*": {
+      "import": "./dist/adapters/*.js",
+      "types": "./dist/dts/adapters/*.d.ts"
+    },
+    "./Interceptors": {
+      "import": "./dist/Interceptors/index.js",
+      "types": "./dist/dts/Interceptors/index.d.ts"
+    },
+    "./Interceptors/*": {
+      "import": "./dist/Interceptors/*.js",
+      "types": "./dist/dts/Interceptors/*.d.ts"
+    }
+  },
+  "peerDependencies": {
+    "effect": "^3.5.7",
+    "fp-ts": "^2.16.9"
+  }
+}
