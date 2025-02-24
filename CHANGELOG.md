@@ -1,5 +1,12 @@
 # effect-fetch
 
+## 2.2.0
+
+### Minor Changes
+
+- c9ca09b: Adds response status filter interceptors and bearer and basic authentication interceptors
+- 09e85aa: Added authentication and status filter interceptors
+
 ## 2.1.0
 
 ### Minor Changes
